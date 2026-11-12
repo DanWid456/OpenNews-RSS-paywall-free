@@ -73,6 +73,21 @@ anzeigen» ist angekreuzt. Vier eigene Feeds sind kostenlos
 Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch
 (`lib/l10n.dart`). Neue Texte dort in allen vier Sprachen ergänzen.
 
+## Homescreen-Widget
+
+Das Widget zeigt die neuesten frei lesbaren Artikel und lässt sich in der
+Grösse verstellen. Es übernimmt den Stand der letzten Aktualisierung in der
+App; im Hintergrund lädt es nichts nach. Quelltext und Layouts liegen in
+`android_extra/` und werden von `tool/setup_android.sh` ins Android-Projekt
+kopiert.
+
+## Updates der Test-APK
+
+`tool/debug.keystore` ist ein fester Test-Schlüssel (Passwort `android`).
+Damit haben alle Test-APKs dieselbe Signatur und lassen sich über die
+vorherige Version installieren. Der Schlüssel ist öffentlich und nur für
+Tests gedacht.
+
 ## Play Store
 
 - In der Play Console ein Einmalkauf-Produkt mit der ID `pro_upgrade` anlegen.

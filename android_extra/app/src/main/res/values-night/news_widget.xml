@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="news_widget_background">#FF1B1D22</color>
+    <color name="news_widget_text">#FFF1F2F4</color>
+    <color name="news_widget_meta">#FFA9B0BC</color>
+    <color name="news_widget_accent">#FF8FB6F2</color>
+    <color name="news_widget_divider">#FF30343C</color>
+</resources>

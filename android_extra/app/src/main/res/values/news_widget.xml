@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="news_widget_background">#FFFFFFFF</color>
+    <color name="news_widget_text">#FF16181D</color>
+    <color name="news_widget_meta">#FF5B6270</color>
+    <color name="news_widget_accent">#FF1F5FBF</color>
+    <color name="news_widget_divider">#FFE6E8EC</color>
+    <string name="news_widget_title">OpenNews</string>
+    <string name="news_widget_empty">Open the app to load articles.</string>
+</resources>

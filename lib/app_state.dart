@@ -4,6 +4,7 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -104,10 +105,66 @@ class AppState extends ChangeNotifier {
     pro.addListener(notifyListeners);
     unawaited(pro.init(_prefs));
     await _reload(notify: false);
+    await _initWidgetLaunch();
     if (onboarded) {
       unawaited(refresh());
       unawaited(syncCatalog());
     }
+  }
+
+  // --- Homescreen-Widget ---
+
+  /// Reagiert auf Tipps im Widget: Die App wird mit dem Link des Artikels
+  /// gestartet und öffnet ihn.
+  Future<void> _initWidgetLaunch() async {
+    try {
+      HomeWidget.widgetClicked.listen(_openFromWidget, onError: (_) {});
+      final initial = await HomeWidget.initiallyLaunchedFromHomeWidget();
+      if (initial != null) {
+        // Erst öffnen, wenn die Oberfläche steht.
+        unawaited(Future<void>.delayed(
+            const Duration(milliseconds: 600), () => _openFromWidget(initial)));
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _openFromWidget(Uri? uri) async {
+    if (uri == null || !uri.scheme.startsWith('http')) return;
+    final link = uri.toString();
+    await db.setRead(link);
+    await openInBrowser(link);
+    await _reload();
+  }
+
+  /// Schreibt die neuesten sichtbaren Artikel für das Widget und stösst
+  /// dessen Aktualisierung an.
+  Future<void> _updateWidget() async {
+    try {
+      final keepCategory = selectedCategory;
+      final keepSearch = search;
+      selectedCategory = null;
+      search = '';
+      var items = <Article>[];
+      try {
+        items = feed.take(25).toList();
+      } finally {
+        selectedCategory = keepCategory;
+        search = keepSearch;
+      }
+      String two(int n) => n.toString().padLeft(2, '0');
+      final data = [
+        for (final a in items)
+          {
+            't': a.title,
+            's': '${sourceLabel(a)} · ${two(a.published.hour)}:'
+                '${two(a.published.minute)}',
+            'l': a.link,
+          },
+      ];
+      await HomeWidget.saveWidgetData<String>(
+          'widget_articles', jsonEncode(data));
+      await HomeWidget.updateWidget(androidName: 'NewsWidgetProvider');
+    } catch (_) {}
   }
 
   Future<void> _loadCustomFeeds() async {
@@ -393,6 +450,7 @@ class AppState extends ChangeNotifier {
       checkTotal = 0;
       checkDone = 0;
       await _reload();
+      unawaited(_updateWidget());
     }
   }
 
