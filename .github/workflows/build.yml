@@ -22,6 +22,8 @@ jobs:
           cache: true
 
       # Solange kein android/-Ordner im Repository liegt, wird er hier erzeugt.
+      # Für den Play-Store-Release den Ordner einmal erzeugen, einchecken und
+      # dort Signatur und App-ID pflegen.
       - name: Android-Projekt erzeugen (falls nicht vorhanden)
         run: |
           if [ ! -d android ]; then
@@ -35,7 +37,7 @@ jobs:
               fi
             done
           fi
-          
+
       - run: flutter pub get
 
       - name: Statische Prüfung
