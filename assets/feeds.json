@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "updated": "2026-11-12",
+  "generic": {
+    "urlContains": ["/plus/", "/premium/", "/abo/", "/paid/"],
+    "titlePrefixes": ["Abo:", "Plus:", "Premium:"],
+    "textContains": ["nur für Abonnenten", "nur für Abonnentinnen"],
+    "htmlContains": []
+  },
+  "sources": [
+    {
+      "id": "srf",
+      "name": "SRF",
+      "country": "CH",
+      "language": "de",
+      "homepage": "https://www.srf.ch",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://www.srf.ch/news/bnf/rss/1646", "categories": ["top"] },
+        { "url": "https://www.srf.ch/news/bnf/rss/1890", "categories": ["politik"] },
+        { "url": "https://www.srf.ch/news/bnf/rss/1922", "categories": ["international"] },
+        { "url": "https://www.srf.ch/news/bnf/rss/1926", "categories": ["wirtschaft"] },
+        { "url": "https://www.srf.ch/sport/bnf/rss/718", "categories": ["sport"] },
+        { "url": "https://www.srf.ch/kultur/bnf/rss/454", "categories": ["kultur"] },
+        { "url": "https://www.srf.ch/wissen/bnf/rss/630", "categories": ["wissenschaft"] }
+      ]
+    },
+    {
+      "id": "watson",
+      "name": "watson",
+      "country": "CH",
+      "language": "de",
+      "homepage": "https://www.watson.ch",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://www.watson.ch/api/1.0/rss/index.xml", "categories": ["top"] }
+      ]
+    },
+    {
+      "id": "tagesschau",
+      "name": "tagesschau",
+      "country": "DE",
+      "language": "de",
+      "homepage": "https://www.tagesschau.de",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://www.tagesschau.de/index~rss2.xml", "categories": ["top"] },
+        { "url": "https://www.tagesschau.de/inland/index~rss2.xml", "categories": ["politik"] },
+        { "url": "https://www.tagesschau.de/ausland/index~rss2.xml", "categories": ["international"] },
+        { "url": "https://www.tagesschau.de/wirtschaft/index~rss2.xml", "categories": ["wirtschaft"] },
+        { "url": "https://www.tagesschau.de/wissen/index~rss2.xml", "categories": ["wissenschaft"] }
+      ]
+    },
+    {
+      "id": "dlf",
+      "name": "Deutschlandfunk",
+      "country": "DE",
+      "language": "de",
+      "homepage": "https://www.deutschlandfunk.de",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://www.deutschlandfunk.de/nachrichten-100.rss", "categories": ["top"] }
+      ]
+    },
+    {
+      "id": "sportschau",
+      "name": "Sportschau",
+      "country": "DE",
+      "language": "de",
+      "homepage": "https://www.sportschau.de",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://www.sportschau.de/index~rss2.xml", "categories": ["sport"] }
+      ]
+    },
+    {
+      "id": "heise",
+      "name": "heise online",
+      "country": "DE",
+      "language": "de",
+      "homepage": "https://www.heise.de",
+      "paywall": {
+        "urlContains": ["/plus/"],
+        "titlePrefixes": ["heise+"]
+      },
+      "feeds": [
+        { "url": "https://www.heise.de/rss/heise-atom.xml", "categories": ["technologie"] }
+      ]
+    },
+    {
+      "id": "orf",
+      "name": "ORF",
+      "country": "AT",
+      "language": "de",
+      "homepage": "https://orf.at",
+      "paywall": {},
+      "feeds": [
+        { "url": "https://rss.orf.at/news.xml", "categories": ["top"] },
+        { "url": "https://rss.orf.at/sport.xml", "categories": ["sport"] },
+        { "url": "https://rss.orf.at/science.xml", "categories": ["wissenschaft"] }
+      ]
+    }
+  ]
+}
