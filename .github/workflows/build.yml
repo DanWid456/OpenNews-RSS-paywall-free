@@ -21,21 +21,13 @@ jobs:
           channel: stable
           cache: true
 
-      # Solange kein android/-Ordner im Repository liegt, wird er hier erzeugt.
-      # Für den Play-Store-Release den Ordner einmal erzeugen, einchecken und
-      # dort Signatur und App-ID pflegen.
+      # Solange kein android/-Ordner im Repository liegt, erzeugt ihn das
+      # Skript tool/setup_android.sh (inkl. Homescreen-Widget aus
+      # android_extra/).
       - name: Android-Projekt erzeugen (falls nicht vorhanden)
         run: |
           if [ ! -d android ]; then
-            flutter create --platforms=android --org ch.dawisoft --project-name opennews .
-            rm -rf test
-            sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' android/app/src/main/AndroidManifest.xml
-            sed -i 's#android:label="opennews"#android:label="OpenNews"#' android/app/src/main/AndroidManifest.xml
-            for f in android/build.gradle.kts android/build.gradle; do
-              if [ -f "$f" ]; then
-                printf '\nsubprojects {\n    tasks.matching { it.name.startsWith("lintVital") }.configureEach { enabled = false }\n}\n' >> "$f"
-              fi
-            done
+            bash tool/setup_android.sh
           fi
 
       - run: flutter pub get
