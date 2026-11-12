@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../app_state.dart';
 import '../config.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../screens/reader.dart';
+import '../screens/related.dart';
+
+const Color kReadGreen = Color(0xFF2E9E5B);
 
 String timeAgo(DateTime t) {
   final d = DateTime.now().difference(t);
-  if (d.inMinutes < 1) return 'gerade eben';
-  if (d.inMinutes < 60) return 'vor ${d.inMinutes} Min.';
-  if (d.inHours < 24) return 'vor ${d.inHours} Std.';
-  if (d.inDays < 7) return 'vor ${d.inDays} T.';
+  if (d.inMinutes < 1) return tr('time_now');
+  if (d.inMinutes < 60) return tr('time_min', {'n': d.inMinutes});
+  if (d.inHours < 24) return tr('time_h', {'n': d.inHours});
+  if (d.inDays < 7) return tr('time_d', {'n': d.inDays});
   return '${t.day}.${t.month}.${t.year}';
 }
-
-String categoryLabel(Article a) =>
-    a.categories.isEmpty ? '' : (kCategories[a.categories.first] ?? '');
 
 /// Öffnet die Leseansicht (bei Volltext im Feed) oder den In-App-Browser.
 Future<void> openArticle(BuildContext context, Article a) async {
@@ -30,9 +32,17 @@ Future<void> openArticle(BuildContext context, Article a) async {
   }
 }
 
+Future<void> shareArticle(Article a) async {
+  try {
+    await SharePlus.instance
+        .share(ShareParams(text: '${a.title}\n${a.link}', subject: a.title));
+  } catch (_) {}
+}
+
 Future<void> showArticleMenu(BuildContext context, Article a) async {
   final app = AppState.instance;
   final messenger = ScaffoldMessenger.of(context);
+  final navigator = Navigator.of(context);
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -43,15 +53,32 @@ Future<void> showArticleMenu(BuildContext context, Article a) async {
           ListTile(
             leading:
                 Icon(a.bookmarked ? Icons.bookmark : Icons.bookmark_border),
-            title: Text(a.bookmarked ? 'Aus Merkliste entfernen' : 'Merken'),
+            title: Text(a.bookmarked ? tr('menu_unsave') : tr('menu_save')),
             onTap: () {
               Navigator.pop(sheet);
               app.toggleBookmark(a);
             },
           ),
           ListTile(
+            leading: const Icon(Icons.share_outlined),
+            title: Text(tr('menu_share')),
+            onTap: () {
+              Navigator.pop(sheet);
+              shareArticle(a);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.dynamic_feed_outlined),
+            title: Text(tr('menu_more')),
+            onTap: () {
+              Navigator.pop(sheet);
+              navigator.push(MaterialPageRoute(
+                  builder: (_) => RelatedScreen(article: a)));
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.open_in_browser),
-            title: const Text('Original öffnen'),
+            title: Text(tr('menu_open')),
             onTap: () {
               Navigator.pop(sheet);
               app.markRead(a);
@@ -60,16 +87,16 @@ Future<void> showArticleMenu(BuildContext context, Article a) async {
           ),
           ListTile(
             leading: const Icon(Icons.lock_outline),
-            title: const Text('Als Paywall melden'),
-            subtitle: const Text('Blendet den Artikel aus'),
+            title: Text(tr('menu_report')),
+            subtitle: Text(tr('menu_report_sub')),
             onTap: () async {
               Navigator.pop(sheet);
               await app.reportPaywall(a);
               messenger.showSnackBar(SnackBar(
-                content: const Text('Artikel ausgeblendet.'),
+                content: Text(tr('reported')),
                 action: kIssuesConfigured
                     ? SnackBarAction(
-                        label: 'Weitermelden',
+                        label: tr('report_forward'),
                         onPressed: () => app.openIssueFor(a))
                     : null,
               ));
@@ -81,33 +108,56 @@ Future<void> showArticleMenu(BuildContext context, Article a) async {
   );
 }
 
+/// Grüner Haken für gelesene Artikel.
+class ReadMark extends StatelessWidget {
+  const ReadMark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.check_circle,
+        size: 18, color: kReadGreen, semanticLabel: tr('read'));
+  }
+}
+
+/// Zeile mit Quelle, Thema und Zeit; rechts der Gelesen-Haken.
 class _Meta extends StatelessWidget {
   final Article article;
   final bool showCategory;
-  const _Meta(this.article, {this.showCategory = true});
+  final bool showRead;
+  const _Meta(this.article, {this.showCategory = true, this.showRead = true});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final app = AppState.instance;
     final grey = theme.colorScheme.onSurfaceVariant;
-    final cat = showCategory ? categoryLabel(article) : '';
+    final catId = showCategory ? app.firstCategory(article) : null;
     final base = theme.textTheme.bodySmall!.copyWith(color: grey);
-    return Text.rich(
+    final line = Text.rich(
       TextSpan(children: [
         TextSpan(
-          text: article.sourceName,
+          text: app.sourceLabel(article),
           style: base.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurface),
         ),
-        if (cat.isNotEmpty) TextSpan(text: ' · $cat'),
+        if (catId != null) TextSpan(text: ' · ${tr('cat_$catId')}'),
         TextSpan(text: ' · ${timeAgo(article.published)}'),
         if (article.status == PaywallStatus.unclear)
-          const TextSpan(text: ' · ungeprüft'),
+          TextSpan(text: ' · ${tr('unverified')}'),
       ]),
       style: base,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+    );
+    return Row(
+      children: [
+        Expanded(child: line),
+        if (showRead && article.isRead) ...[
+          const SizedBox(width: 8),
+          const ReadMark(),
+        ],
+      ],
     );
   }
 }
@@ -146,13 +196,11 @@ class _Thumb extends StatelessWidget {
   }
 }
 
-TextStyle _titleStyle(BuildContext context, Article a, TextStyle base) {
-  final scheme = Theme.of(context).colorScheme;
-  return base.copyWith(
-    fontWeight: FontWeight.w600,
-    color: a.isRead ? scheme.onSurfaceVariant : scheme.onSurface,
-  );
-}
+/// Die Titelfarbe bleibt immer gleich; gelesen zeigt nur der grüne Haken.
+TextStyle _titleStyle(BuildContext context, TextStyle base) => base.copyWith(
+      fontWeight: FontWeight.w600,
+      color: Theme.of(context).colorScheme.onSurface,
+    );
 
 /// Ansicht 1: nur Titel, sehr dicht.
 class CompactTile extends StatelessWidget {
@@ -173,7 +221,7 @@ class CompactTile extends StatelessWidget {
             Text(article.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: _titleStyle(context, article,
+                style: _titleStyle(context,
                     text.bodyLarge!.copyWith(fontSize: 15, height: 1.33))),
             const SizedBox(height: 4),
             _Meta(article),
@@ -214,7 +262,6 @@ class MagazineTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: _titleStyle(
                             context,
-                            article,
                             text.bodyLarge!
                                 .copyWith(fontSize: 16, height: 1.31))),
                     const SizedBox(height: 6),
@@ -259,10 +306,10 @@ class CardTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Meta(article),
+                    _Meta(article, showRead: false),
                     const SizedBox(height: 6),
                     Text(article.title,
-                        style: _titleStyle(context, article,
+                        style: _titleStyle(context,
                             text.titleLarge!.copyWith(fontSize: 20))),
                     if (article.summary.isNotEmpty) ...[
                       const SizedBox(height: 6),
@@ -275,29 +322,32 @@ class CardTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4, bottom: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: article.bookmarked
-                            ? 'Aus Merkliste entfernen'
-                            : 'Merken',
-                        icon: Icon(article.bookmarked
-                            ? Icons.bookmark
-                            : Icons.bookmark_border),
-                        onPressed: () => app.toggleBookmark(article),
-                      ),
-                      IconButton(
-                        tooltip: 'Mehr',
-                        icon: const Icon(Icons.more_horiz),
-                        onPressed: () => showArticleMenu(context, article),
-                      ),
-                    ],
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, right: 12, bottom: 2),
+                child: Row(
+                  children: [
+                    IconButton(
+                      tooltip: article.bookmarked
+                          ? tr('menu_unsave')
+                          : tr('menu_save'),
+                      icon: Icon(article.bookmarked
+                          ? Icons.bookmark
+                          : Icons.bookmark_border),
+                      onPressed: () => app.toggleBookmark(article),
+                    ),
+                    IconButton(
+                      tooltip: tr('menu_share'),
+                      icon: const Icon(Icons.share_outlined),
+                      onPressed: () => shareArticle(article),
+                    ),
+                    IconButton(
+                      tooltip: tr('more'),
+                      icon: const Icon(Icons.more_horiz),
+                      onPressed: () => showArticleMenu(context, article),
+                    ),
+                    const Spacer(),
+                    if (article.isRead) const ReadMark(),
+                  ],
                 ),
               ),
             ],

@@ -162,6 +162,9 @@ class Article {
   /// Volltext aus dem Feed (HTML), falls der Feed ihn mitliefert.
   final String? content;
   final List<String> categories;
+
+  /// Adressen aller Feeds, in denen der Artikel vorkam.
+  final List<String> feedUrls;
   final DateTime published;
   final PaywallStatus status;
   final bool isRead;
@@ -169,6 +172,7 @@ class Article {
 
   const Article({
     required this.link,
+    required this.feedUrls,
     required this.sourceId,
     required this.sourceName,
     required this.title,
@@ -193,6 +197,7 @@ class Article {
         'imageUrl': imageUrl,
         'content': content,
         'categories': categories.join(','),
+        'feedUrl': '\n${feedUrls.join('\n')}\n',
         'published': published.millisecondsSinceEpoch,
         'status': status.index,
         'isRead': isRead ? 1 : 0,
@@ -204,6 +209,10 @@ class Article {
     final cats = (m['categories'] as String?) ?? '';
     return Article(
       link: m['link'] as String,
+      feedUrls: ((m['feedUrl'] as String?) ?? '')
+          .split('\n')
+          .where((s) => s.isNotEmpty)
+          .toList(),
       sourceId: (m['sourceId'] as String?) ?? '',
       sourceName: (m['sourceName'] as String?) ?? '',
       title: (m['title'] as String?) ?? '',
@@ -221,7 +230,40 @@ class Article {
   }
 }
 
-/// Zähler pro Quelle für die Paywall-Quote.
+/// Ein Feed, wie er in der App erscheint: Katalog- oder eigener Feed samt
+/// den Anpassungen des Nutzers (Name, Thema, ein/aus).
+class FeedEntry {
+  final NewsSource source;
+  final FeedDef feed;
+
+  /// Kurzer Name für die Artikelliste.
+  final String label;
+
+  /// Name in der Quellenliste.
+  final String listName;
+  final List<String> categories;
+  final bool enabled;
+
+  const FeedEntry({
+    required this.source,
+    required this.feed,
+    required this.label,
+    required this.listName,
+    required this.categories,
+    required this.enabled,
+  });
+
+  String get url => feed.url;
+  bool get isCustom => source.isCustom;
+}
+
+class FeedSuggestion {
+  final String title;
+  final String url;
+  const FeedSuggestion(this.title, this.url);
+}
+
+/// Zähler pro Feed für die Paywall-Quote.
 class SourceStats {
   int free = 0;
   int paywall = 0;

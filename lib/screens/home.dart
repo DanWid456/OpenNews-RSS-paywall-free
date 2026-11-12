@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_state.dart';
-import '../config.dart';
+import '../l10n.dart';
 import '../widgets/tiles.dart';
 import 'settings.dart';
 import 'sources.dart';
@@ -18,33 +18,38 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: index,
-        children: const [
-          FeedScreen(),
-          BookmarksScreen(),
-          SourcesScreen(),
-          SettingsScreen(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: (i) => setState(() => index = i),
-        destinations: const [
-          NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Feed'),
-          NavigationDestination(
-              icon: Icon(Icons.bookmark_border),
-              selectedIcon: Icon(Icons.bookmark),
-              label: 'Gemerkt'),
-          NavigationDestination(
-              icon: Icon(Icons.rss_feed), label: 'Quellen'),
-          NavigationDestination(
-              icon: Icon(Icons.tune), label: 'Einstellungen'),
-        ],
+    // Hört auf den App-Zustand, damit die Beschriftungen einem Sprachwechsel
+    // folgen.
+    return ListenableBuilder(
+      listenable: AppState.instance,
+      builder: (context, _) => Scaffold(
+        body: IndexedStack(
+          index: index,
+          children: const [
+            FeedScreen(),
+            BookmarksScreen(),
+            SourcesScreen(),
+            SettingsScreen(),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: index,
+          onDestinationSelected: (i) => setState(() => index = i),
+          destinations: [
+            NavigationDestination(
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: tr('nav_feed')),
+            NavigationDestination(
+                icon: const Icon(Icons.bookmark_border),
+                selectedIcon: const Icon(Icons.bookmark),
+                label: tr('nav_saved')),
+            NavigationDestination(
+                icon: const Icon(Icons.rss_feed), label: tr('nav_sources')),
+            NavigationDestination(
+                icon: const Icon(Icons.tune), label: tr('nav_settings')),
+          ],
+        ),
       ),
     );
   }
@@ -92,13 +97,13 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _tab(String? id, String label) {
+  Widget _tab(String? id) {
     final selected = app.selectedCategory == id;
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () => app.setCategory(id),
       child: Container(
-        height: 44,
+        height: 40,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -109,13 +114,38 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ),
         child: Text(
-          label,
+          id == null ? tr('all') : tr('cat_$id'),
           style: TextStyle(
             fontSize: 14,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
             color: selected ? scheme.primary : scheme.onSurfaceVariant,
           ),
         ),
+      ),
+    );
+  }
+
+  /// Themen-Reiter: «Alle» zuvorderst, ab fünf Einträgen auf zwei Zeilen
+  /// verteilt. Passt eine Zeile nicht in die Breite, lässt sich der Block
+  /// seitlich schieben.
+  Widget _tabs() {
+    final ids = <String?>[null, ...app.tabs];
+    final List<List<String?>> rows;
+    if (ids.length <= 4) {
+      rows = [ids];
+    } else {
+      final firstRow = (ids.length + 1) ~/ 2;
+      rows = [ids.sublist(0, firstRow), ids.sublist(firstRow)];
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final row in rows)
+            Row(children: [for (final id in row) _tab(id)]),
+        ],
       ),
     );
   }
@@ -143,13 +173,13 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Heute',
+                          Text(tr('today'),
                               style: text.headlineSmall!
                                   .copyWith(fontWeight: FontWeight.w600)),
                           Text(
                             hidden == 0
-                                ? 'Nur frei lesbare Artikel'
-                                : '$hidden Paywall-Artikel ausgeblendet',
+                                ? tr('only_free')
+                                : tr('hidden_count', {'n': hidden}),
                             style: text.bodySmall!.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant),
                           ),
@@ -157,14 +187,14 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Suchen',
+                      tooltip: tr('search'),
                       icon: Icon(searching ? Icons.close : Icons.search),
                       onPressed: _toggleSearch,
                     ),
-                    _viewButton(0, Icons.view_headline, 'Kompakte Ansicht'),
-                    _viewButton(1, Icons.view_list, 'Magazin-Ansicht'),
-                    _viewButton(2, Icons.view_agenda_outlined,
-                        'Karten-Ansicht'),
+                    _viewButton(0, Icons.view_headline, tr('view_compact')),
+                    _viewButton(1, Icons.view_list, tr('view_magazine')),
+                    _viewButton(
+                        2, Icons.view_agenda_outlined, tr('view_cards')),
                   ],
                 ),
               ),
@@ -175,26 +205,16 @@ class _FeedScreenState extends State<FeedScreen> {
                     controller: searchController,
                     autofocus: true,
                     textInputAction: TextInputAction.search,
-                    decoration: const InputDecoration(
-                      hintText: 'In Titeln und Anrissen suchen',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: tr('search_hint'),
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
                       isDense: true,
                     ),
                     onChanged: app.setSearch,
                   ),
                 ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Row(
-                  children: [
-                    _tab(null, 'Alle'),
-                    for (final id in app.tabs)
-                      _tab(id, kCategories[id] ?? id),
-                  ],
-                ),
-              ),
+              _tabs(),
               const Divider(),
               if (busy)
                 LinearProgressIndicator(
@@ -218,10 +238,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             const SizedBox(height: 16),
                             Text(
                               app.lastError ??
-                                  (busy
-                                      ? 'Artikel werden geladen und geprüft …'
-                                      : 'Keine Artikel gefunden. Zum '
-                                          'Aktualisieren nach unten ziehen.'),
+                                  (busy ? tr('loading') : tr('empty')),
                               textAlign: TextAlign.center,
                               style: text.bodyLarge,
                             ),
@@ -254,31 +271,27 @@ class BookmarksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = AppState.instance;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Gemerkt')),
-      body: ListenableBuilder(
-        listenable: app,
-        builder: (context, _) {
-          final items = app.bookmarks;
-          if (items.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'Noch nichts gemerkt. Artikel lange drücken und '
-                  '«Merken» wählen.',
-                  textAlign: TextAlign.center,
+    return ListenableBuilder(
+      listenable: app,
+      builder: (context, _) {
+        final items = app.bookmarks;
+        return Scaffold(
+          appBar: AppBar(title: Text(tr('nav_saved'))),
+          body: items.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(tr('saved_empty'),
+                        textAlign: TextAlign.center),
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => const Divider(),
+                  itemBuilder: (_, i) => articleTile(items[i], 1),
                 ),
-              ),
-            );
-          }
-          return ListView.separated(
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (_, i) => articleTile(items[i], 1),
-          );
-        },
-      ),
+        );
+      },
     );
   }
 }

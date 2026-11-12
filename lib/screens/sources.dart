@@ -1,68 +1,84 @@
 import 'package:flutter/material.dart';
 
 import '../app_state.dart';
+import '../l10n.dart';
 import '../models.dart';
+import '../widgets/feed_dialogs.dart';
+import '../widgets/pickers.dart';
 
-/// Quellen der Region mit Paywall-Quote; einzeln abschaltbar.
+/// Alle Feeds mit Thema und Paywall-Quote. Der Schalter schaltet einen Feed
+/// ein oder aus; ein Tipp auf den Namen öffnet Name und Thema.
 class SourcesScreen extends StatelessWidget {
   const SourcesScreen({super.key});
 
-  String _statsLine(SourceStats? s) {
-    if (s == null || s.total == 0) return 'Noch keine geprüften Artikel';
-    return '${s.free} frei · ${s.paywall} Paywall · ${s.unclear} unklar '
-        '(Paywall-Quote ${s.paywallPercent} %)';
+  String _subtitle(FeedEntry e, SourceStats? s) {
+    final cat =
+        e.categories.isEmpty ? '' : '${tr('cat_${e.categories.first}')}\n';
+    if (e.source.unfiltered) return '$cat${tr('filter_off')}';
+    if (s == null || s.total == 0) return '$cat${tr('stats_none')}';
+    return cat +
+        tr('stats_line', {
+          'f': s.free,
+          'p': s.paywall,
+          'u': s.unclear,
+          'q': s.paywallPercent,
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     final app = AppState.instance;
     final text = Theme.of(context).textTheme;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Quellen')),
-      body: ListenableBuilder(
-        listenable: app,
-        builder: (context, _) {
-          final off = app.disabledSources.toSet();
-          final region = app.regionSources;
-          final custom = app.customSources;
+    return ListenableBuilder(
+      listenable: app,
+      builder: (context, _) {
+        final all = app.entries;
+        final own = all
+            .where((e) => !e.isCustom && e.source.country == app.country)
+            .toList();
+        final other = all
+            .where((e) => !e.isCustom && e.source.country != app.country)
+            .toList();
+        final custom = all.where((e) => e.isCustom).toList();
 
-          Widget tile(NewsSource s) => SwitchListTile(
-                title: Text(s.name),
-                subtitle: Text(s.unfiltered
-                    ? 'Ungefiltert – alle Beiträge werden angezeigt'
-                    : _statsLine(app.stats[s.id])),
-                value: !off.contains(s.id),
-                onChanged: (v) => app.setSourceEnabled(s.id, v),
-              );
+        Widget tile(FeedEntry e) => ListTile(
+              title: Text(e.listName),
+              subtitle: Text(_subtitle(e, app.stats[e.url])),
+              isThreeLine: true,
+              onTap: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => EditFeedDialog(entry: e)),
+              trailing: Switch(
+                value: e.enabled,
+                onChanged: (v) => app.setFeedEnabled(e.url, v),
+              ),
+            );
 
-          return ListView(
+        return Scaffold(
+          appBar: AppBar(title: Text(tr('nav_sources'))),
+          floatingActionButton: FloatingActionButton(
+            tooltip: tr('add_feed'),
+            onPressed: () => showAddFeed(context),
+            child: const Icon(Icons.add),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.only(bottom: 88),
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Text(
-                  'Die Paywall-Quote zeigt, wie viele Artikel einer Quelle '
-                  'ausgeblendet werden mussten.',
-                  style: text.bodySmall,
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text(tr('sources_hint'), style: text.bodySmall),
               ),
-              if (region.isEmpty)
-                const ListTile(
-                  title: Text('Für diese Region und Sprache sind noch keine '
-                      'Quellen hinterlegt.'),
-                ),
-              for (final s in region) tile(s),
-              if (custom.isNotEmpty) ...[
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: Text('Eigene Feeds', style: text.titleSmall),
-                ),
-                for (final s in custom) tile(s),
-              ],
+              if (all.isEmpty) ListTile(title: Text(tr('err_no_sources'))),
+              if (own.isNotEmpty) SectionHeader(tr('src_own_country')),
+              for (final e in own) tile(e),
+              if (other.isNotEmpty) SectionHeader(tr('src_other')),
+              for (final e in other) tile(e),
+              if (custom.isNotEmpty) SectionHeader(tr('src_custom')),
+              for (final e in custom) tile(e),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

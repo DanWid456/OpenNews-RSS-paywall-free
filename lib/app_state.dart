@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -6,19 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'config.dart';
+import 'l10n.dart';
 import 'models.dart';
 import 'services/db.dart';
+import 'services/feed_search.dart';
 import 'services/net.dart';
 import 'services/paywall.dart';
 import 'services/purchases.dart';
 import 'services/region.dart';
 import 'services/rss_parser.dart';
-
-class _FeedJob {
-  final NewsSource source;
-  final FeedDef feed;
-  const _FeedJob(this.source, this.feed);
-}
 
 /// Gesamter App-Zustand: Einstellungen, Quellenkatalog, Artikel und Abruf.
 class AppState extends ChangeNotifier {
@@ -36,6 +34,12 @@ class AppState extends ChangeNotifier {
   Map<String, SourceStats> stats = {};
   int hiddenCount = 0;
 
+  /// Anpassungen pro Feed-Adresse: `name`, `category`, `enabled`.
+  Map<String, Map<String, dynamic>> _overrides = {};
+
+  List<FeedEntry>? _entries;
+  Map<String, FeedEntry>? _entryByUrl;
+
   bool refreshing = false;
   int checkTotal = 0;
   int checkDone = 0;
@@ -45,28 +49,53 @@ class AppState extends ChangeNotifier {
   String? selectedCategory;
   String search = '';
 
+  @override
+  void notifyListeners() {
+    // Jede Zustandsänderung kann Namen, Themen oder Auswahl der Feeds
+    // betreffen – die abgeleitete Liste wird beim nächsten Zugriff neu gebaut.
+    _entries = null;
+    _entryByUrl = null;
+    super.notifyListeners();
+  }
+
   // --- Einstellungen ---
 
   bool get onboarded => _prefs.getBool('onboarded') ?? false;
   String get country => _prefs.getString('country') ?? 'CH';
   String get language => _prefs.getString('language') ?? 'de';
-  List<String> get interests =>
-      _prefs.getStringList('interests') ?? const ['top'];
+
+  List<String> get interests {
+    final stored = _prefs.getStringList('interests') ?? const <String>[];
+    final valid = kCategoryIds.where(stored.contains).toList();
+    return valid.isEmpty ? const ['top'] : valid;
+  }
+
   int get viewMode => _prefs.getInt('viewMode') ?? 1;
   bool get deepCheck => _prefs.getBool('deepCheck') ?? true;
   List<String> get mutedWords => _prefs.getStringList('mutedWords') ?? const [];
-  List<String> get disabledSources =>
-      _prefs.getStringList('disabledSources') ?? const [];
   ThemeMode get themeMode =>
       ThemeMode.values[(_prefs.getInt('themeMode') ?? 0).clamp(0, 2).toInt()];
 
+  /// `system` oder ein Sprachkürzel aus [kUiLanguages].
+  String get uiLanguage => _prefs.getString('uiLanguage') ?? 'system';
+
   bool get isPro => pro.isPro;
+  bool get canAddFeed => isPro || customFeeds.length < kFreeCustomFeeds;
+
+  void _applyUiLanguage() {
+    final choice = uiLanguage;
+    setUiLanguage(choice == 'system'
+        ? PlatformDispatcher.instance.locale.languageCode.toLowerCase()
+        : choice);
+  }
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    _applyUiLanguage();
     await db.open();
     await _loadCatalog();
-    customFeeds = await db.customFeeds();
+    await _loadCustomFeeds();
+    _loadOverrides();
     if (!onboarded) {
       final region = await detectRegion();
       await _prefs.setString('country', region.country);
@@ -79,6 +108,34 @@ class AppState extends ChangeNotifier {
       unawaited(refresh());
       unawaited(syncCatalog());
     }
+  }
+
+  Future<void> _loadCustomFeeds() async {
+    final loaded = await db.customFeeds();
+    customFeeds = [
+      for (final f in loaded)
+        kCategoryIds.contains(f.category)
+            ? f
+            : CustomFeed(f.url, f.title, 'top', f.unfiltered),
+    ];
+  }
+
+  void _loadOverrides() {
+    _overrides = {};
+    try {
+      final raw = jsonDecode(_prefs.getString('feedOverrides') ?? '{}');
+      if (raw is Map) {
+        raw.forEach((k, v) {
+          if (k is String && v is Map) {
+            _overrides[k] = Map<String, dynamic>.from(v);
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveOverrides() async {
+    await _prefs.setString('feedOverrides', jsonEncode(_overrides));
   }
 
   // --- Quellenkatalog ---
@@ -102,89 +159,133 @@ class AppState extends ChangeNotifier {
     } else {
       catalog = bundled ?? FeedCatalog.empty();
     }
+    _entries = null;
+    _entryByUrl = null;
   }
 
   /// Holt eine neuere feeds.json von GitHub. Gibt eine Statusmeldung zurück.
   Future<String> syncCatalog() async {
-    if (!kRemoteConfigured) return 'Online-Update ist noch nicht eingerichtet.';
+    if (!kRemoteConfigured) return tr('sync_off');
     final res = await fetchUrl(kRemoteFeedsUrl, maxBytes: 2000000);
-    if (res == null || res.status != 200) {
-      return 'Quellenliste nicht erreichbar.';
-    }
+    if (res == null || res.status != 200) return tr('sync_unreachable');
     try {
       final text = decodeBody(res.bytes);
       final remote = FeedCatalog.parse(text);
       if (remote.schemaVersion > kSupportedSchema) {
-        return 'Neue Quellenliste braucht ein App-Update.';
+        return tr('sync_needs_update');
       }
       if (remote.version <= catalog.version) {
-        return 'Quellenliste ist aktuell (Version ${catalog.version}).';
+        return tr('sync_current', {'v': catalog.version});
       }
       await db.kvSet('feeds_json', text);
       catalog = remote;
       notifyListeners();
       unawaited(refresh());
-      return 'Quellenliste aktualisiert (Version ${remote.version}).';
+      return tr('sync_updated', {'v': remote.version});
     } catch (_) {
-      return 'Heruntergeladene Quellenliste ist ungültig.';
+      return tr('sync_invalid');
     }
   }
 
-  /// Quellen aus dem Katalog, die zu Land und Sprache passen.
-  List<NewsSource> get regionSources {
-    var s = catalog.sources
-        .where((x) => x.country == country && x.language == language)
-        .toList();
-    if (s.isEmpty) {
-      s = catalog.sources.where((x) => x.language == language).toList();
+  // --- Feeds, wie sie in der App erscheinen ---
+
+  String _defaultListName(NewsSource s, List<String> cats) {
+    if (s.feeds.length > 1 && cats.isNotEmpty) {
+      return '${s.name} – ${tr('cat_${cats.first}')}';
     }
-    if (s.isEmpty) {
-      s = catalog.sources.where((x) => x.country == country).toList();
-    }
-    return s;
+    return s.name;
   }
 
-  List<NewsSource> get customSources =>
-      isPro ? customFeeds.map((f) => f.toSource()).toList() : const [];
+  List<FeedEntry> _buildEntries() {
+    // Katalogquellen in der Nachrichtensprache; gibt es keine, die des Landes.
+    var sources =
+        catalog.sources.where((x) => x.language == language).toList();
+    if (sources.isEmpty) {
+      sources = catalog.sources.where((x) => x.country == country).toList();
+    }
+    final out = <FeedEntry>[];
+    for (final s in [...sources, ...customFeeds.map((f) => f.toSource())]) {
+      for (final f in s.feeds) {
+        final o = _overrides[f.url];
+        final name = s.isCustom ? '' : ((o?['name'] as String?) ?? '').trim();
+        final cat = s.isCustom ? null : o?['category'] as String?;
+        final cats = (cat != null && kCategoryIds.contains(cat))
+            ? [cat]
+            : f.categories.where(kCategoryIds.contains).toList();
+        // Quellen des eigenen Landes und eigene Feeds sind von Haus aus an,
+        // gleichsprachige Quellen anderer Länder aus.
+        final defaultOn = s.isCustom || s.country == country;
+        out.add(FeedEntry(
+          source: s,
+          feed: f,
+          label: name.isNotEmpty ? name : s.name,
+          listName: name.isNotEmpty ? name : _defaultListName(s, cats),
+          categories: cats,
+          enabled: (o?['enabled'] as bool?) ?? defaultOn,
+        ));
+      }
+    }
+    return out;
+  }
 
-  List<NewsSource> get activeSources {
-    final off = disabledSources.toSet();
-    return [
-      ...regionSources.where((s) => !off.contains(s.id)),
-      ...customSources.where((s) => !off.contains(s.id)),
-    ];
+  List<FeedEntry> get entries => _entries ??= _buildEntries();
+
+  Map<String, FeedEntry> get _byUrl =>
+      _entryByUrl ??= {for (final e in entries) e.url: e};
+
+  List<FeedEntry> _activeEntriesOf(Article a) => [
+        for (final u in a.feedUrls)
+          if (_byUrl[u]?.enabled ?? false) _byUrl[u]!,
+      ];
+
+  /// Name der Quelle, wie er in der Artikelliste steht.
+  String sourceLabel(Article a) {
+    for (final u in a.feedUrls) {
+      final e = _byUrl[u];
+      if (e != null) return e.label;
+    }
+    return a.sourceName;
+  }
+
+  /// Erstes Thema des Artikels (für die Anzeige).
+  String? firstCategory(Article a) {
+    for (final e in _activeEntriesOf(a)) {
+      if (e.categories.isNotEmpty) return e.categories.first;
+    }
+    return null;
   }
 
   // --- Artikel-Listen ---
 
   /// Themen-Reiter im Feed: gewählte Interessen plus Themen eigener Feeds.
   List<String> get tabs {
-    final out = <String>[...interests];
-    for (final f in customFeeds) {
-      if (isPro && !out.contains(f.category)) out.add(f.category);
+    final out = <String>{...interests};
+    for (final e in entries) {
+      if (e.isCustom && e.enabled) out.addAll(e.categories);
     }
-    return kCategories.keys.where(out.contains).toList();
+    return kCategoryIds.where(out.contains).toList();
   }
 
-  static final _nonWord = RegExp(r'[^a-z0-9äöüàéèç]+');
+  static final _nonWord = RegExp(r'[^a-z0-9äöüàâéèêçîôûìòù]+');
+
+  bool _statusVisible(Article a) =>
+      a.status == PaywallStatus.free ||
+      a.status == PaywallStatus.unclear ||
+      (a.status == PaywallStatus.unchecked && !deepCheck);
 
   List<Article> get feed {
-    final activeIds = activeSources.map((s) => s.id).toSet();
     final wanted = interests.toSet();
     final muted = mutedWords.map((w) => w.toLowerCase()).toList();
     final query = search.trim().toLowerCase();
     final seen = <String>{};
     final out = <Article>[];
     for (final a in _articles) {
-      if (!activeIds.contains(a.sourceId)) continue;
-      final visible = a.status == PaywallStatus.free ||
-          a.status == PaywallStatus.unclear ||
-          (a.status == PaywallStatus.unchecked && !deepCheck);
-      if (!visible) continue;
-      final isCustom = a.sourceId.startsWith('custom:');
-      if (!isCustom && !a.categories.any(wanted.contains)) continue;
-      if (selectedCategory != null &&
-          !a.categories.contains(selectedCategory)) {
+      final active = _activeEntriesOf(a);
+      if (active.isEmpty || !_statusVisible(a)) continue;
+      final cats = <String>{for (final e in active) ...e.categories};
+      final isCustom = active.any((e) => e.isCustom);
+      if (!isCustom && !cats.any(wanted.contains)) continue;
+      if (selectedCategory != null && !cats.contains(selectedCategory)) {
         continue;
       }
       final text = '${a.title} ${a.summary}'.toLowerCase();
@@ -198,11 +299,52 @@ class AppState extends ChangeNotifier {
     return out;
   }
 
+  Set<String> _keywords(String title) => title
+      .toLowerCase()
+      .split(_nonWord)
+      .where((w) => w.length >= 5)
+      .toSet();
+
+  /// Weitere Artikel zum selben Thema: Titel, die mindestens zwei längere
+  /// Wörter mit [a] teilen (bei sehr kurzen Titeln eines).
+  List<Article> related(Article a) {
+    final words = _keywords(a.title);
+    if (words.isEmpty) return const [];
+    final need = words.length >= 3 ? 2 : 1;
+    final scored = <MapEntry<Article, int>>[];
+    final seen = <String>{};
+    for (final b in _articles) {
+      if (b.link == a.link || !_statusVisible(b)) continue;
+      if (_activeEntriesOf(b).isEmpty) continue;
+      final score = _keywords(b.title).where(words.contains).length;
+      if (score < need) continue;
+      final key = b.title.toLowerCase().replaceAll(_nonWord, '');
+      if (!seen.add(key)) continue;
+      scored.add(MapEntry(b, score));
+    }
+    scored.sort((x, y) {
+      final byScore = y.value.compareTo(x.value);
+      return byScore != 0
+          ? byScore
+          : y.key.published.compareTo(x.key.published);
+    });
+    return scored.take(30).map((e) => e.key).toList();
+  }
+
   Future<void> _reload({bool notify = true}) async {
     _articles = await db.recent();
     bookmarks = await db.bookmarks();
-    stats = await db.stats();
     hiddenCount = await db.hiddenCount();
+    final s = <String, SourceStats>{};
+    for (final a in _articles) {
+      for (final u in a.feedUrls) {
+        final st = s.putIfAbsent(u, () => SourceStats());
+        if (a.status == PaywallStatus.free) st.free++;
+        if (a.status == PaywallStatus.paywall) st.paywall++;
+        if (a.status == PaywallStatus.unclear) st.unclear++;
+      }
+    }
+    stats = s;
     if (notify) notifyListeners();
   }
 
@@ -230,23 +372,18 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     try {
       final wanted = interests.toSet();
-      final jobs = <_FeedJob>[];
-      for (final s in activeSources) {
-        for (final f in s.feeds) {
-          if (s.isCustom || f.categories.any(wanted.contains)) {
-            jobs.add(_FeedJob(s, f));
-          }
-        }
-      }
+      final jobs = entries
+          .where((e) =>
+              e.enabled && (e.isCustom || e.categories.any(wanted.contains)))
+          .toList();
       var failures = 0;
-      await _pool<_FeedJob>(jobs, 4, (j) async {
-        if (!await _loadFeed(j)) failures++;
+      await _pool<FeedEntry>(jobs, 4, (e) async {
+        if (!await _loadFeed(e)) failures++;
       });
-      if (jobs.isEmpty) {
-        lastError = 'Für diese Region und Sprache sind noch keine Quellen '
-            'hinterlegt.';
-      } else if (failures == jobs.length) {
-        lastError = 'Keine Quelle erreichbar. Bitte Verbindung prüfen.';
+      if (entries.isEmpty) {
+        lastError = tr('err_no_sources');
+      } else if (jobs.isNotEmpty && failures == jobs.length) {
+        lastError = tr('err_offline');
       }
       await db.prune();
       await _reload();
@@ -259,8 +396,8 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<bool> _loadFeed(_FeedJob j) async {
-    final res = await fetchUrl(j.feed.url, maxBytes: 3000000);
+  Future<bool> _loadFeed(FeedEntry e) async {
+    final res = await fetchUrl(e.url, maxBytes: 3000000);
     if (res == null || res.status != 200) return false;
     final ParsedFeed parsed;
     try {
@@ -268,13 +405,13 @@ class AppState extends ChangeNotifier {
     } catch (_) {
       return false;
     }
-    final rules = catalog.generic.merge(j.source.rules);
+    final rules = catalog.generic.merge(e.source.rules);
     final now = DateTime.now();
     final list = <Article>[];
     for (final it in parsed.items.take(40)) {
       if (!it.link.startsWith('http') || it.title.isEmpty) continue;
       var status = PaywallStatus.unchecked;
-      if (j.source.unfiltered) {
+      if (e.source.unfiltered) {
         status = PaywallStatus.free;
       } else if (matchesRules(
           link: it.link, title: it.title, summary: it.summary, rules: rules)) {
@@ -284,25 +421,26 @@ class AppState extends ChangeNotifier {
       if (published.isAfter(now)) published = now;
       list.add(Article(
         link: it.link,
-        sourceId: j.source.id,
-        sourceName: j.source.name,
+        feedUrls: [e.url],
+        sourceId: e.source.id,
+        sourceName: e.source.name,
         title: it.title,
         summary: it.summary,
         imageUrl: it.imageUrl,
         content: it.content,
-        categories: j.feed.categories,
+        categories: e.feed.categories,
         published: published,
         status: status,
       ));
     }
-    await db.insertNew(list);
+    await db.insertNew(list, e.url);
     return true;
   }
 
   Future<void> _runDeepCheck() async {
-    final byId = {for (final s in activeSources) s.id: s};
+    final sourceById = {for (final e in entries) e.source.id: e.source};
     final todo = (await db.unchecked(kDeepCheckBatch * 3))
-        .where((a) => byId.containsKey(a.sourceId))
+        .where((a) => _activeEntriesOf(a).isNotEmpty)
         .take(kDeepCheckBatch)
         .toList();
     if (todo.isEmpty) return;
@@ -312,7 +450,7 @@ class AppState extends ChangeNotifier {
     await _pool<Article>(todo, 3, (a) async {
       final patterns = [
         ...catalog.generic.htmlContains,
-        ...byId[a.sourceId]!.rules.htmlContains,
+        ...?sourceById[a.sourceId]?.rules.htmlContains,
       ];
       final result = await checkArticle(a.link, patterns);
       if (result != null) {
@@ -419,6 +557,12 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setUiLanguageChoice(String code) async {
+    await _prefs.setString('uiLanguage', code);
+    _applyUiLanguage();
+    notifyListeners();
+  }
+
   Future<void> addMutedWord(String word) async {
     final w = word.trim();
     if (w.isEmpty || mutedWords.contains(w)) return;
@@ -432,19 +576,42 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setSourceEnabled(String id, bool enabled) async {
-    final off = disabledSources.toSet();
-    if (enabled) {
-      off.remove(id);
-    } else {
-      off.add(id);
-    }
-    await _prefs.setStringList('disabledSources', off.toList());
+  // --- Feeds anpassen ---
+
+  Future<void> setFeedEnabled(String url, bool enabled) async {
+    (_overrides[url] ??= <String, dynamic>{})['enabled'] = enabled;
+    await _saveOverrides();
     notifyListeners();
     if (enabled) unawaited(refresh());
   }
 
-  // --- Eigene Feeds (Pro) ---
+  /// Name und Thema eines Katalog-Feeds überschreiben.
+  Future<void> setFeedOverride(String url,
+      {required String name, required String category}) async {
+    final o = _overrides[url] ??= <String, dynamic>{};
+    o['name'] = name.trim();
+    o['category'] = category;
+    await _saveOverrides();
+    if (selectedCategory != null && !tabs.contains(selectedCategory)) {
+      selectedCategory = null;
+    }
+    notifyListeners();
+    unawaited(refresh());
+  }
+
+  /// Name und Thema eines Katalog-Feeds auf die Vorgabe zurücksetzen.
+  Future<void> resetFeedOverride(String url) async {
+    final o = _overrides[url];
+    if (o == null) return;
+    o.remove('name');
+    o.remove('category');
+    if (o.isEmpty) _overrides.remove(url);
+    await _saveOverrides();
+    notifyListeners();
+    unawaited(refresh());
+  }
+
+  // --- Eigene Feeds ---
 
   /// Prüft die Adresse und speichert den Feed. Gibt eine Fehlermeldung
   /// zurück oder `null` bei Erfolg.
@@ -455,24 +622,22 @@ class AppState extends ChangeNotifier {
     required bool unfiltered,
   }) async {
     var u = url.trim();
-    if (u.isEmpty) return 'Bitte eine Adresse eingeben.';
+    if (u.isEmpty) return tr('err_empty');
     if (!u.startsWith('http')) u = 'https://$u';
     final res = await fetchUrl(u, maxBytes: 3000000);
-    if (res == null || res.status != 200) {
-      return 'Die Adresse ist nicht erreichbar.';
-    }
+    if (res == null || res.status != 200) return tr('err_unreachable');
     final ParsedFeed parsed;
     try {
       parsed = parseFeed(decodeBody(res.bytes));
     } catch (_) {
-      return 'Unter dieser Adresse liegt kein RSS- oder Atom-Feed.';
+      return tr('err_no_feed');
     }
-    if (parsed.items.isEmpty) return 'Der Feed enthält keine Beiträge.';
+    if (parsed.items.isEmpty) return tr('err_no_items');
     var name = title.trim();
     if (name.isEmpty) name = parsed.title;
     if (name.isEmpty) name = Uri.parse(u).host;
     await db.saveCustomFeed(CustomFeed(u, name, category, unfiltered));
-    customFeeds = await db.customFeeds();
+    await _loadCustomFeeds();
     notifyListeners();
     unawaited(refresh());
     return null;
@@ -489,8 +654,10 @@ class AppState extends ChangeNotifier {
       await db.resetStatus(old.sourceId,
           unfiltered ? PaywallStatus.free : PaywallStatus.unchecked);
     }
-    if (old.category != category) await db.deleteBySource(old.sourceId);
-    customFeeds = await db.customFeeds();
+    await _loadCustomFeeds();
+    if (selectedCategory != null && !tabs.contains(selectedCategory)) {
+      selectedCategory = null;
+    }
     notifyListeners();
     unawaited(refresh());
   }
@@ -498,9 +665,26 @@ class AppState extends ChangeNotifier {
   Future<void> removeCustomFeed(CustomFeed f) async {
     await db.deleteCustomFeed(f.url);
     await db.deleteBySource(f.sourceId);
-    customFeeds = await db.customFeeds();
+    _overrides.remove(f.url);
+    await _saveOverrides();
+    await _loadCustomFeeds();
     await _reload();
   }
+
+  CustomFeed? customFeedByUrl(String url) {
+    for (final f in customFeeds) {
+      if (f.url == url) return f;
+    }
+    return null;
+  }
+
+  Future<List<FeedSuggestion>> suggestFeeds(String query) => searchFeeds(
+        query,
+        catalog: catalog,
+        country: country,
+        nameOf: (s, f) => _defaultListName(
+            s, f.categories.where(kCategoryIds.contains).toList()),
+      );
 
   String exportOpml() {
     String esc(String s) => s
@@ -511,7 +695,7 @@ class AppState extends ChangeNotifier {
     final b = StringBuffer()
       ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
       ..writeln('<opml version="2.0">')
-      ..writeln('<head><title>Eigene Feeds</title></head>')
+      ..writeln('<head><title>$kAppName</title></head>')
       ..writeln('<body>');
     for (final f in customFeeds) {
       b.writeln('<outline type="rss" text="${esc(f.title)}" '
@@ -524,7 +708,8 @@ class AppState extends ChangeNotifier {
   }
 
   /// Liest Feed-Adressen aus OPML-Text oder aus einer Liste mit einer
-  /// Adresse pro Zeile. Gibt die Anzahl hinzugefügter Feeds zurück.
+  /// Adresse pro Zeile. Gibt die Anzahl hinzugefügter Feeds zurück; hört
+  /// auf, sobald ohne Pro die Freigrenze erreicht ist.
   Future<int> importFeeds(String text) async {
     final urls = <String>{};
     for (final m in RegExp('xmlUrl=["\']([^"\']+)["\']').allMatches(text)) {
@@ -540,6 +725,7 @@ class AppState extends ChangeNotifier {
     var added = 0;
     for (final u in urls) {
       if (known.contains(u)) continue;
+      if (!canAddFeed) break;
       final error = await addCustomFeed(
           url: u, title: '', category: 'top', unfiltered: false);
       if (error == null) added++;

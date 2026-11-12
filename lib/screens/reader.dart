@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html;
 
 import '../app_state.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../widgets/tiles.dart';
 
@@ -36,10 +37,10 @@ class ReaderScreen extends StatelessWidget {
     final image = article.imageUrl ?? '';
     return Scaffold(
       appBar: AppBar(
-        title: Text(article.sourceName),
+        title: Text(app.sourceLabel(article)),
         actions: [
           IconButton(
-            tooltip: 'Original öffnen',
+            tooltip: tr('menu_open'),
             icon: const Icon(Icons.open_in_browser),
             onPressed: () => app.openInBrowser(article.link),
           ),
@@ -52,7 +53,7 @@ class ReaderScreen extends StatelessWidget {
               style: text.headlineSmall!
                   .copyWith(fontWeight: FontWeight.w600, height: 1.25)),
           const SizedBox(height: 8),
-          Text('${article.sourceName} · ${timeAgo(article.published)}',
+          Text('${app.sourceLabel(article)} · ${timeAgo(article.published)}',
               style: text.bodySmall!
                   .copyWith(color: theme.colorScheme.onSurfaceVariant)),
           if (image.isNotEmpty) ...[
@@ -75,7 +76,7 @@ class ReaderScreen extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => app.openInBrowser(article.link),
             icon: const Icon(Icons.open_in_browser),
-            label: const Text('Original öffnen'),
+            label: Text(tr('menu_open')),
           ),
         ],
       ),

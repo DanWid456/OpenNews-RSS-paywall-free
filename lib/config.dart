@@ -20,17 +20,25 @@ const String kUserAgent =
     'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 '
     '(KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36';
 
-/// Themen: ID (wie in feeds.json) -> Anzeigename.
-const Map<String, String> kCategories = {
-  'top': 'Schlagzeilen',
-  'politik': 'Politik',
-  'international': 'Ausland',
-  'wirtschaft': 'Wirtschaft',
-  'technologie': 'Technologie',
-  'wissenschaft': 'Wissenschaft',
-  'sport': 'Sport',
-  'kultur': 'Kultur',
-};
+/// Themen-IDs (wie in feeds.json). Die Anzeigenamen stehen in l10n.dart
+/// unter `cat_<id>`.
+const List<String> kCategoryIds = [
+  'top',
+  'inland',
+  'ausland',
+  'politik',
+  'wirtschaft',
+  'technik',
+  'sport',
+  'kultur',
+  'gesundheit',
+  'alltag',
+];
+
+/// So viele eigene Feeds sind ohne Pro möglich.
+const int kFreeCustomFeeds = 4;
+
+const String kAppName = 'OpenNews';
 
 const Map<String, String> kCountries = {
   'CH': 'Schweiz',

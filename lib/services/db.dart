@@ -10,11 +10,20 @@ class AppDb {
     final dir = await getDatabasesPath();
     _db = await openDatabase(
       p.join(dir, 'news_reader.db'),
-      version: 1,
+      version: 2,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Version 2 merkt sich, aus welchen Feeds ein Artikel stammt. Der
+          // alte Cache hat diese Angabe nicht und wird neu aufgebaut.
+          await db.execute('ALTER TABLE articles ADD COLUMN feedUrl TEXT');
+          await db.delete('articles', where: 'bookmarked = 0');
+        }
+      },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE articles(
             link TEXT PRIMARY KEY,
+            feedUrl TEXT,
             sourceId TEXT,
             sourceName TEXT,
             title TEXT,
@@ -59,12 +68,19 @@ class AppDb {
 
   /// Fügt nur neue Artikel ein; bereits bekannte (und ihr Prüfstatus)
   /// bleiben unverändert.
-  Future<void> insertNew(List<Article> articles) async {
+  ///
+  /// Kam ein bekannter Artikel bisher nur aus anderen Feeds, wird [feedUrl]
+  /// bei ihm ergänzt. So erscheint er unter allen seinen Themen.
+  Future<void> insertNew(List<Article> articles, String feedUrl) async {
     if (articles.isEmpty) return;
     final batch = _db.batch();
     for (final a in articles) {
       batch.insert('articles', a.toMap(),
           conflictAlgorithm: ConflictAlgorithm.ignore);
+      batch.rawUpdate(
+          'UPDATE articles SET feedUrl = COALESCE(feedUrl, char(10)) || ? '
+          "WHERE link = ? AND instr(COALESCE(feedUrl, ''), ?) = 0",
+          ['$feedUrl\n', a.link, '\n$feedUrl\n']);
     }
     await batch.commit(noResult: true);
   }
@@ -125,23 +141,6 @@ class AppDb {
         'SELECT COUNT(*) AS c FROM articles WHERE status = ? AND published > ?',
         [PaywallStatus.paywall.index, cutoff]);
     return (r.first['c'] as int?) ?? 0;
-  }
-
-  Future<Map<String, SourceStats>> stats() async {
-    final rows = await _db.rawQuery(
-        'SELECT sourceId, status, COUNT(*) AS c FROM articles '
-        'GROUP BY sourceId, status');
-    final out = <String, SourceStats>{};
-    for (final r in rows) {
-      final s = out.putIfAbsent(
-          (r['sourceId'] as String?) ?? '', () => SourceStats());
-      final c = (r['c'] as int?) ?? 0;
-      final st = (r['status'] as int?) ?? 0;
-      if (st == PaywallStatus.free.index) s.free += c;
-      if (st == PaywallStatus.paywall.index) s.paywall += c;
-      if (st == PaywallStatus.unclear.index) s.unclear += c;
-    }
-    return out;
   }
 
   /// Entfernt Artikel, die älter als [days] Tage und nicht gemerkt sind.

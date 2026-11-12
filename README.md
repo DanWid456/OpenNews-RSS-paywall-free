@@ -44,8 +44,10 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
 - `version` bei jeder Änderung um 1 erhöhen – nur dann übernimmt die App die
   Datei. `schemaVersion` nur ändern, wenn sich der Aufbau ändert.
 - `country`: `CH`, `DE`, `AT`. `language`: `de`, `fr`, `it`, `en`.
-- `categories`: `top`, `politik`, `international`, `wirtschaft`,
-  `technologie`, `wissenschaft`, `sport`, `kultur`.
+- `categories`: `top`, `inland`, `ausland`, `politik`, `wirtschaft`, `technik`,
+  `sport`, `kultur`, `gesundheit`, `alltag`.
+- Angezeigt werden alle Quellen in der Nachrichtensprache des Nutzers. Quellen
+  des eigenen Landes sind von Haus aus eingeschaltet, die übrigen aus.
 - `urlContains`, `titlePrefixes`, `textContains` wirken in Stufe 1 (aus dem
   Feed), `htmlContains` in Stufe 2 (im HTML der Artikelseite).
 - Der Reiter «Quellen» in der App zeigt pro Quelle die Paywall-Quote. Quellen
@@ -62,8 +64,14 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
    nur einmal geprüft. Pro Aktualisierung werden höchstens 60 Artikel tief
    geprüft (`kDeepCheckBatch`).
 
-Eigene Feeds (Pro) werden genauso gefiltert, ausser «Alle Beiträge
-ungefiltert anzeigen» ist angekreuzt.
+Eigene Feeds werden genauso gefiltert, ausser «Alle Beiträge ungefiltert
+anzeigen» ist angekreuzt. Vier eigene Feeds sind kostenlos
+(`kFreeCustomFeeds`), für weitere braucht es Pro.
+
+## Sprachen
+
+Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch
+(`lib/l10n.dart`). Neue Texte dort in allen vier Sprachen ergänzen.
 
 ## Play Store
 

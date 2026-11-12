@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../config.dart';
+import '../l10n.dart';
 import '../widgets/pickers.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -26,19 +27,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.all(24),
           children: [
             const SizedBox(height: 16),
-            Text('Willkommen', style: text.headlineMedium),
+            Text(tr('welcome'), style: text.headlineMedium),
             const SizedBox(height: 8),
-            Text(
-              'Du siehst nur Artikel, die frei lesbar sind. Beiträge hinter '
-              'einer Bezahlschranke werden ausgeblendet.',
-              style: text.bodyLarge,
-            ),
+            Text(tr('welcome_text'), style: text.bodyLarge),
             const SizedBox(height: 32),
-            Text('Deine Region', style: text.titleMedium),
+            Text(tr('your_region'), style: text.titleMedium),
             const SizedBox(height: 4),
-            Text('Automatisch erkannt – bei Bedarf anpassen.',
-                style: text.bodySmall),
-            const SizedBox(height: 8),
+            Text(tr('region_auto'), style: text.bodySmall),
+            const SizedBox(height: 12),
             RegionPicker(
               country: country,
               language: language,
@@ -48,7 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               }),
             ),
             const SizedBox(height: 32),
-            Text('Was interessiert dich?', style: text.titleMedium),
+            Text(tr('interests_q'), style: text.titleMedium),
             const SizedBox(height: 12),
             InterestChips(
               selected: selected,
@@ -63,10 +59,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: selected.isEmpty
                   ? null
                   : () => app.finishOnboarding(country, language,
-                      kCategories.keys.where(selected.contains).toList()),
+                      kCategoryIds.where(selected.contains).toList()),
               style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(52)),
-              child: const Text('Los geht\'s'),
+              child: Text(tr('start')),
             ),
           ],
         ),
