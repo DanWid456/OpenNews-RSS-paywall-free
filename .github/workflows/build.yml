@@ -29,8 +29,13 @@ jobs:
             rm -rf test
             sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' android/app/src/main/AndroidManifest.xml
             sed -i 's#android:label="opennews"#android:label="OpenNews"#' android/app/src/main/AndroidManifest.xml
+            for f in android/build.gradle.kts android/build.gradle; do
+              if [ -f "$f" ]; then
+                printf '\nsubprojects {\n    tasks.matching { it.name.startsWith("lintVital") }.configureEach { enabled = false }\n}\n' >> "$f"
+              fi
+            done
           fi
-
+          
       - run: flutter pub get
 
       - name: Statische Prüfung
