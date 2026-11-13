@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": 8,
+  "version": 10,
   "updated": "2026-11-13",
   "generic": {
     "urlContains": [
@@ -624,12 +624,6 @@
           "categories": [
             "kultur"
           ]
-        },
-        {
-          "url": "https://www.ansa.it/sito/notizie/tecnologia/tecnologia.rss",
-          "categories": [
-            "technik"
-          ]
         }
       ]
     },
@@ -711,22 +705,6 @@
       "optional": true
     },
     {
-      "id": "rtve",
-      "name": "RTVE Noticias",
-      "country": "ES",
-      "language": "es",
-      "homepage": "https://www.rtve.es/noticias/",
-      "paywall": {},
-      "feeds": [
-        {
-          "url": "https://www.rtve.es/noticias/rsstraducida/portada.xml",
-          "categories": [
-            "top"
-          ]
-        }
-      ]
-    },
-    {
       "id": "elpais",
       "name": "El País",
       "country": "ES",
@@ -735,7 +713,7 @@
       "paywall": {},
       "feeds": [
         {
-          "url": "https://feeds.elpais.com/mrss-s/pages/elpais/portada",
+          "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
           "categories": [
             "top"
           ]
@@ -761,40 +739,6 @@
           "url": "https://e00-elmundo.uecdn.es/elmundo/rss/internacional.xml",
           "categories": [
             "ausland"
-          ]
-        }
-      ],
-      "optional": true
-    },
-    {
-      "id": "repubblica",
-      "name": "la Repubblica",
-      "country": "IT",
-      "language": "it",
-      "homepage": "https://www.repubblica.it",
-      "paywall": {},
-      "feeds": [
-        {
-          "url": "https://www.repubblica.it/rss/homepage",
-          "categories": [
-            "top"
-          ]
-        }
-      ],
-      "optional": true
-    },
-    {
-      "id": "corriere",
-      "name": "Corriere della Sera",
-      "country": "IT",
-      "language": "it",
-      "homepage": "https://www.corriere.it",
-      "paywall": {},
-      "feeds": [
-        {
-          "url": "https://xml2.corriereobjects.it/rss/homepage.xml",
-          "categories": [
-            "top"
           ]
         }
       ],
@@ -865,6 +809,70 @@
         }
       ],
       "optional": true
+    },
+    {
+      "id": "rainews",
+      "name": "Rai News",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.rainews.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.rainews.it/rss/tutti",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ilsole24ore",
+      "name": "Il Sole 24 Ore",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.ilsole24ore.com",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.ilsole24ore.com/rss/italia--attualita.xml",
+          "categories": [
+            "inland"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agi",
+      "name": "AGI",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.agi.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.agi.it/cronaca/rss/",
+          "categories": [
+            "inland"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adnkronos",
+      "name": "Adnkronos",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.adnkronos.com",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.adnkronos.com/rss.xml",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
     }
   ]
 }
