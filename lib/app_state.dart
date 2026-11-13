@@ -277,7 +277,8 @@ class AppState extends ChangeNotifier {
             : f.categories.where(kCategoryIds.contains).toList();
         // Quellen des eigenen Landes und eigene Feeds sind von Haus aus an,
         // gleichsprachige Quellen anderer Länder aus.
-        final defaultOn = s.isCustom || noneLocal || s.country == country;
+        final defaultOn = s.isCustom ||
+            (!s.optional && (noneLocal || s.country == country));
         out.add(FeedEntry(
           source: s,
           feed: f,
@@ -434,6 +435,15 @@ class AppState extends ChangeNotifier {
     lastError = null;
     notifyListeners();
     try {
+      // Als paywallfrei geführte Quellen: früher als «unklar» gespeicherte
+      // Artikel freigeben.
+      final trusted = <String>{
+        for (final e in entries)
+          if (e.source.paywallFree) e.source.id,
+      };
+      for (final id in trusted) {
+        await db.resetStatus(id, PaywallStatus.free);
+      }
       final wanted = interests.toSet();
       final jobs = entries
           .where((e) =>
@@ -475,7 +485,7 @@ class AppState extends ChangeNotifier {
     for (final it in parsed.items.take(40)) {
       if (!it.link.startsWith('http') || it.title.isEmpty) continue;
       var status = PaywallStatus.unchecked;
-      if (e.source.unfiltered) {
+      if (e.source.unfiltered || e.source.paywallFree) {
         status = PaywallStatus.free;
       } else if (matchesRules(
           link: it.link, title: it.title, summary: it.summary, rules: rules)) {

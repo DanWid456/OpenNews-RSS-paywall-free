@@ -55,6 +55,14 @@ class NewsSource {
   /// Nur bei eigenen Feeds: alle Beiträge ohne Paywall-Prüfung anzeigen.
   final bool unfiltered;
 
+  /// Quelle ohne Bezahlschranke, deren Seiten sich nicht prüfen lassen
+  /// (`paywallFree` in feeds.json): Artikel gelten ohne Tiefenprüfung als frei.
+  final bool paywallFree;
+
+  /// Quelle mit häufiger Bezahlschranke (`optional` in feeds.json): wird
+  /// angeboten, ist aber von Haus aus ausgeschaltet.
+  final bool optional;
+
   const NewsSource({
     required this.id,
     required this.name,
@@ -64,6 +72,8 @@ class NewsSource {
     required this.feeds,
     this.isCustom = false,
     this.unfiltered = false,
+    this.paywallFree = false,
+    this.optional = false,
   });
 }
 
@@ -114,6 +124,8 @@ class FeedCatalog {
         language: (s['language']?.toString() ?? '').toLowerCase(),
         rules: PaywallRules.fromJson(s['paywall']),
         feeds: feeds,
+        paywallFree: s['paywallFree'] == true,
+        optional: s['optional'] == true,
       ));
     }
     if (sources.isEmpty) {

@@ -23,7 +23,7 @@ from email.utils import parsedate_to_datetime
 
 UA = ("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36")
-SAMPLE = 3          # Artikelseiten pro Feed in der Stichprobe
+SAMPLE = 6          # Artikelseiten pro Feed in der Stichprobe
 MIN_TEXT = 500      # wie kMinFreeTextLength in der App
 AD_MARKERS = ["googletag", "adsbygoogle", "doubleclick.net",
               "googlesyndication", "taboola", "outbrain", "adslot",

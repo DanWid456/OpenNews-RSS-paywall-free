@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": 6,
+  "version": 8,
   "updated": "2026-11-13",
   "generic": {
     "urlContains": [
@@ -370,7 +370,8 @@
             "kultur"
           ]
         }
-      ]
+      ],
+      "paywallFree": true
     },
     {
       "id": "radio-canada",
@@ -623,6 +624,12 @@
           "categories": [
             "kultur"
           ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/tecnologia/tecnologia.rss",
+          "categories": [
+            "technik"
+          ]
         }
       ]
     },
@@ -657,6 +664,207 @@
           ]
         }
       ]
+    },
+    {
+      "id": "franceinfo",
+      "name": "franceinfo",
+      "country": "FR",
+      "language": "fr",
+      "homepage": "https://www.francetvinfo.fr",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.francetvinfo.fr/titres.rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lemonde",
+      "name": "Le Monde",
+      "country": "FR",
+      "language": "fr",
+      "homepage": "https://www.lemonde.fr",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.lemonde.fr/rss/une.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://www.lemonde.fr/politique/rss_full.xml",
+          "categories": [
+            "politik"
+          ]
+        },
+        {
+          "url": "https://www.lemonde.fr/international/rss_full.xml",
+          "categories": [
+            "ausland"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "rtve",
+      "name": "RTVE Noticias",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://www.rtve.es/noticias/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.rtve.es/noticias/rsstraducida/portada.xml",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elpais",
+      "name": "El País",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://elpais.com",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://feeds.elpais.com/mrss-s/pages/elpais/portada",
+          "categories": [
+            "top"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "elmundo",
+      "name": "El Mundo",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://www.elmundo.es",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://e00-elmundo.uecdn.es/rss/portada.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://e00-elmundo.uecdn.es/elmundo/rss/internacional.xml",
+          "categories": [
+            "ausland"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "repubblica",
+      "name": "la Repubblica",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.repubblica.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.repubblica.it/rss/homepage",
+          "categories": [
+            "top"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "corriere",
+      "name": "Corriere della Sera",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.corriere.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://xml2.corriereobjects.it/rss/homepage.xml",
+          "categories": [
+            "top"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "guardian",
+      "name": "The Guardian",
+      "country": "GB",
+      "language": "en",
+      "homepage": "https://www.theguardian.com/international",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.theguardian.com/international/rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nytimes",
+      "name": "The New York Times",
+      "country": "US",
+      "language": "en",
+      "homepage": "https://www.nytimes.com",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+          "categories": [
+            "top"
+          ]
+        }
+      ],
+      "optional": true
+    },
+    {
+      "id": "spiegel",
+      "name": "DER SPIEGEL",
+      "country": "DE",
+      "language": "de",
+      "homepage": "https://www.spiegel.de",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.spiegel.de/schlagzeilen/tops/index.rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nzz",
+      "name": "NZZ",
+      "country": "CH",
+      "language": "de",
+      "homepage": "https://www.nzz.ch",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.nzz.ch/recent.rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ],
+      "optional": true
     }
   ]
 }

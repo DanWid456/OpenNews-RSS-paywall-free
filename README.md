@@ -48,6 +48,11 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
   `sport`, `kultur`, `gesundheit`, `alltag`.
 - Angezeigt werden alle Quellen in der Nachrichtensprache des Nutzers. Quellen
   des eigenen Landes sind von Haus aus eingeschaltet, die übrigen aus.
+- `"paywallFree": true` bei einer Quelle: Ihre Artikel gelten ohne
+  Tiefenprüfung als frei. Nur für Quellen ohne Bezahlschranke, deren Seiten
+  sich nicht prüfen lassen (z. B. France 24).
+- `"optional": true` bei einer Quelle: Sie wird angeboten, ist aber von Haus
+  aus ausgeschaltet. Für Quellen mit häufiger Bezahlschranke.
 - `urlContains`, `titlePrefixes`, `textContains` wirken in Stufe 1 (aus dem
   Feed), `htmlContains` in Stufe 2 (im HTML der Artikelseite).
 - Der Reiter «Quellen» in der App zeigt pro Quelle die Paywall-Quote. Quellen
