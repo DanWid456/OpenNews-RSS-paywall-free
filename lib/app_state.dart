@@ -260,6 +260,12 @@ class AppState extends ChangeNotifier {
     if (sources.isEmpty) {
       sources = catalog.sources.where((x) => x.country == country).toList();
     }
+    if (sources.isEmpty) {
+      // Weder Sprache noch Land abgedeckt: englische Quellen als Ersatz.
+      sources = catalog.sources.where((x) => x.language == 'en').toList();
+    }
+    // Gibt es keine Quelle aus dem eigenen Land, sind alle von Haus aus an.
+    final noneLocal = !sources.any((x) => x.country == country);
     final out = <FeedEntry>[];
     for (final s in [...sources, ...customFeeds.map((f) => f.toSource())]) {
       for (final f in s.feeds) {
@@ -271,7 +277,7 @@ class AppState extends ChangeNotifier {
             : f.categories.where(kCategoryIds.contains).toList();
         // Quellen des eigenen Landes und eigene Feeds sind von Haus aus an,
         // gleichsprachige Quellen anderer Länder aus.
-        final defaultOn = s.isCustom || s.country == country;
+        final defaultOn = s.isCustom || noneLocal || s.country == country;
         out.add(FeedEntry(
           source: s,
           feed: f,

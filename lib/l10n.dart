@@ -88,6 +88,12 @@ const Map<String, String> _de = {
   'country_CH': 'Schweiz',
   'country_DE': 'Deutschland',
   'country_AT': 'Österreich',
+  'country_FR': 'Frankreich',
+  'country_IT': 'Italien',
+  'country_ES': 'Spanien',
+  'country_GB': 'Grossbritannien',
+  'country_US': 'USA',
+  'country_CA': 'Kanada',
   'sources_hint':
       'Schalter: Feed ein- oder ausschalten. Auf den Namen tippen, um Name '
           'und Thema anzupassen. Die Paywall-Quote zeigt, wie viele Artikel '
@@ -237,6 +243,12 @@ const Map<String, String> _fr = {
   'country_CH': 'Suisse',
   'country_DE': 'Allemagne',
   'country_AT': 'Autriche',
+  'country_FR': 'France',
+  'country_IT': 'Italie',
+  'country_ES': 'Espagne',
+  'country_GB': 'Royaume-Uni',
+  'country_US': 'États-Unis',
+  'country_CA': 'Canada',
   'sources_hint':
       'Interrupteur : activer ou désactiver le flux. Touchez le nom pour '
           'modifier le nom et le thème. Le taux de paywall indique combien '
@@ -385,6 +397,12 @@ const Map<String, String> _it = {
   'country_CH': 'Svizzera',
   'country_DE': 'Germania',
   'country_AT': 'Austria',
+  'country_FR': 'Francia',
+  'country_IT': 'Italia',
+  'country_ES': 'Spagna',
+  'country_GB': 'Regno Unito',
+  'country_US': 'Stati Uniti',
+  'country_CA': 'Canada',
   'sources_hint':
       'Interruttore: attiva o disattiva il feed. Tocca il nome per '
           'modificare nome e tema. La quota di paywall indica quanti '
@@ -529,6 +547,12 @@ const Map<String, String> _en = {
   'country_CH': 'Switzerland',
   'country_DE': 'Germany',
   'country_AT': 'Austria',
+  'country_FR': 'France',
+  'country_IT': 'Italy',
+  'country_ES': 'Spain',
+  'country_GB': 'United Kingdom',
+  'country_US': 'United States',
+  'country_CA': 'Canada',
   'sources_hint':
       'Switch: turn a feed on or off. Tap the name to change name and '
           'topic. The paywall rate shows how many articles had to be hidden.',

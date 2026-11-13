@@ -76,7 +76,9 @@ Future<void> showArticleMenu(BuildContext context, Article a) async {
                   builder: (_) => RelatedScreen(article: a)));
             },
           ),
-          ListTile(
+          // Nur sinnvoll, wenn ein Tipp die Leseansicht öffnet.
+          if (a.hasFullText)
+            ListTile(
             leading: const Icon(Icons.open_in_browser),
             title: Text(tr('menu_open')),
             onTap: () {

@@ -8,6 +8,11 @@ const _tlds = {
   'CH': ['ch', 'com', 'de', 'org'],
   'DE': ['de', 'com', 'org'],
   'AT': ['at', 'com', 'de', 'org'],
+  'FR': ['fr', 'com', 'org'],
+  'IT': ['it', 'com', 'org'],
+  'ES': ['es', 'com', 'org'],
+  'GB': ['co.uk', 'com', 'org'],
+  'CA': ['ca', 'com', 'org'],
 };
 
 /// Liest die Feed-Verweise aus dem HTML einer Webseite

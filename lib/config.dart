@@ -44,6 +44,12 @@ const Map<String, String> kCountries = {
   'CH': 'Schweiz',
   'DE': 'Deutschland',
   'AT': 'Österreich',
+  'FR': 'Frankreich',
+  'IT': 'Italien',
+  'ES': 'Spanien',
+  'GB': 'Grossbritannien',
+  'US': 'USA',
+  'CA': 'Kanada',
 };
 
 const Map<String, String> kLanguages = {
@@ -51,6 +57,7 @@ const Map<String, String> kLanguages = {
   'fr': 'Français',
   'it': 'Italiano',
   'en': 'English',
+  'es': 'Español',
 };
 
 /// Wie viele Artikel pro Aktualisierung höchstens tief geprüft werden.

@@ -15,6 +15,17 @@ const _tzCountry = {
   'Europe/Berlin': 'DE',
   'Europe/Busingen': 'DE',
   'Europe/Vienna': 'AT',
+  'Europe/Paris': 'FR',
+  'Europe/Rome': 'IT',
+  'Europe/Madrid': 'ES',
+  'Europe/London': 'GB',
+  'America/Toronto': 'CA',
+  'America/Montreal': 'CA',
+  'America/Vancouver': 'CA',
+  'America/New_York': 'US',
+  'America/Chicago': 'US',
+  'America/Denver': 'US',
+  'America/Los_Angeles': 'US',
 };
 
 /// Ermittelt Land und Sprache ohne Standortberechtigung: Die Zeitzone zeigt,

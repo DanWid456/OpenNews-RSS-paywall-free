@@ -1,18 +1,21 @@
 {
   "schemaVersion": 1,
-  "version": 3,
-  "updated": "2026-11-12",
+  "version": 4,
+  "updated": "2026-11-13",
   "generic": {
     "urlContains": [
       "/plus/",
       "/premium/",
       "/abo/",
-      "/paid/"
+      "/paid/",
+      "/paywall/",
+      "/subscribe/"
     ],
     "titlePrefixes": [
       "Abo:",
       "Plus:",
-      "Premium:"
+      "Premium:",
+      "[Plus]"
     ],
     "textContains": [
       "nur für Abonnenten",
@@ -169,7 +172,8 @@
       "homepage": "https://www.heise.de",
       "paywall": {
         "urlContains": [
-          "/plus/"
+          "/plus/",
+          "/select/"
         ],
         "titlePrefixes": [
           "heise+"
@@ -208,6 +212,468 @@
           "url": "https://rss.orf.at/science.xml",
           "categories": [
             "technik"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20min",
+      "name": "20 Minuten",
+      "country": "CH",
+      "language": "de",
+      "homepage": "https://www.20min.ch",
+      "paywall": {
+        "urlContains": [
+          "/cockpit/"
+        ]
+      },
+      "feeds": [
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten/schweiz",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten/ausland",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten/wirtschaft",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten/sport",
+          "categories": [
+            "sport"
+          ]
+        },
+        {
+          "url": "https://partner-feeds.20min.ch/rss/20minuten/digital",
+          "categories": [
+            "technik"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rts",
+      "name": "RTS Info",
+      "country": "CH",
+      "language": "fr",
+      "homepage": "https://www.rts.ch/info/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.rts.ch/info/?format=rss/news",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://www.rts.ch/info/suisse/?format=rss/news",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://www.rts.ch/info/monde/?format=rss/news",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://www.rts.ch/info/economie/?format=rss/news",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://www.rts.ch/sport/?format=rss/news",
+          "categories": [
+            "sport"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rsi",
+      "name": "RSI News",
+      "country": "CH",
+      "language": "it",
+      "homepage": "https://www.rsi.ch/info/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.rsi.ch/info/?f=rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swissinfo-en",
+      "name": "SWI swissinfo.ch",
+      "country": "CH",
+      "language": "en",
+      "homepage": "https://www.swissinfo.ch/eng/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.swissinfo.ch/service/eng/rssxml/latest-news/rss",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "france24",
+      "name": "France 24",
+      "country": "FR",
+      "language": "fr",
+      "homepage": "https://www.france24.com/fr/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.france24.com/fr/rss",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://www.france24.com/fr/france/rss",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://www.france24.com/fr/%C3%A9co-tech/rss",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://www.france24.com/fr/sports/rss",
+          "categories": [
+            "sport"
+          ]
+        },
+        {
+          "url": "https://www.france24.com/fr/culture/rss",
+          "categories": [
+            "kultur"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "radio-canada",
+      "name": "Radio-Canada Info",
+      "country": "CA",
+      "language": "fr",
+      "homepage": "https://ici.radio-canada.ca/info",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://ici.radio-canada.ca/rss/4159",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cbc",
+      "name": "CBC News",
+      "country": "CA",
+      "language": "en",
+      "homepage": "https://www.cbc.ca/news",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-topstories",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-canada",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-world",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-politics",
+          "categories": [
+            "politik"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-business",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-technology",
+          "categories": [
+            "technik"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-health",
+          "categories": [
+            "gesundheit"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-sports",
+          "categories": [
+            "sport"
+          ]
+        },
+        {
+          "url": "https://www.cbc.ca/webfeed/rss/rss-arts",
+          "categories": [
+            "kultur"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbc",
+      "name": "BBC News",
+      "country": "GB",
+      "language": "en",
+      "homepage": "https://www.bbc.com/news",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://feeds.bbci.co.uk/news/rss.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/uk/rss.xml",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/politics/rss.xml",
+          "categories": [
+            "politik"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+          "categories": [
+            "technik"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/health/rss.xml",
+          "categories": [
+            "gesundheit"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/sport/rss.xml",
+          "categories": [
+            "sport"
+          ]
+        },
+        {
+          "url": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+          "categories": [
+            "kultur"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npr",
+      "name": "NPR News",
+      "country": "US",
+      "language": "en",
+      "homepage": "https://www.npr.org",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://feeds.npr.org/1001/rss.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1003/rss.xml",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1004/rss.xml",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1014/rss.xml",
+          "categories": [
+            "politik"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1006/rss.xml",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1019/rss.xml",
+          "categories": [
+            "technik"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1128/rss.xml",
+          "categories": [
+            "gesundheit"
+          ]
+        },
+        {
+          "url": "https://feeds.npr.org/1008/rss.xml",
+          "categories": [
+            "kultur"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rtve",
+      "name": "RTVE Noticias",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://www.rtve.es/noticias/",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://api2.rtve.es/rss/temas_noticias.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://api2.rtve.es/rss/temas_espana.xml",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://api2.rtve.es/rss/temas_mundo.xml",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://api2.rtve.es/rss/temas_economia.xml",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://api2.rtve.es/rss/temas_deportes.xml",
+          "categories": [
+            "sport"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ansa",
+      "name": "ANSA",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.ansa.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.ansa.it/sito/ansait_rss.xml",
+          "categories": [
+            "top"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml",
+          "categories": [
+            "inland"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml",
+          "categories": [
+            "ausland"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/politica/politica_rss.xml",
+          "categories": [
+            "politik"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/economia/economia_rss.xml",
+          "categories": [
+            "wirtschaft"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml",
+          "categories": [
+            "technik"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/sport/sport_rss.xml",
+          "categories": [
+            "sport"
+          ]
+        },
+        {
+          "url": "https://www.ansa.it/sito/notizie/cultura/cultura_rss.xml",
+          "categories": [
+            "kultur"
           ]
         }
       ]

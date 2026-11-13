@@ -53,6 +53,15 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
 - Der Reiter «Quellen» in der App zeigt pro Quelle die Paywall-Quote. Quellen
   mit hoher Quote oder vielen «unklar» lohnen sich nicht.
 
+## Feeds prüfen
+
+`tool/check_feeds.py` ruft jeden Feed aus `assets/feeds.json` ab und schreibt
+einen Bericht: erreichbar, Anzahl und Alter der Artikel, Treffer der
+Paywall-Regeln, Stichprobe von Artikelseiten und Zahl der Werbe-Marker. Für
+fehlerhafte Feeds sucht es auf der Homepage der Quelle nach Feed-Adressen.
+Der Workflow «Feeds prüfen» (`.github/workflows/feeds.yml`) startet es bei
+jeder Änderung der `feeds.json` oder von Hand unter Actions.
+
 ## Wie gefiltert wird
 
 1. **Stufe 1:** Link, Titel und Anriss gegen die Regeln aus `feeds.json`.
