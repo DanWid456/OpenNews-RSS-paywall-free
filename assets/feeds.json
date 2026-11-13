@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": 5,
+  "version": 6,
   "updated": "2026-11-13",
   "generic": {
     "urlContains": [
@@ -570,22 +570,6 @@
           "url": "https://feeds.npr.org/1008/rss.xml",
           "categories": [
             "kultur"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "rtve",
-      "name": "RTVE Noticias",
-      "country": "ES",
-      "language": "es",
-      "homepage": "https://www.rtve.es/noticias/",
-      "paywall": {},
-      "feeds": [
-        {
-          "url": "https://www.rtve.es/api/noticias.rss",
-          "categories": [
-            "top"
           ]
         }
       ]
