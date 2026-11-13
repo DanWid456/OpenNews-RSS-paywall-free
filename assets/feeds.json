@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": 10,
+  "version": 12,
   "updated": "2026-11-13",
   "generic": {
     "urlContains": [
@@ -843,22 +843,6 @@
       ]
     },
     {
-      "id": "agi",
-      "name": "AGI",
-      "country": "IT",
-      "language": "it",
-      "homepage": "https://www.agi.it",
-      "paywall": {},
-      "feeds": [
-        {
-          "url": "https://www.agi.it/cronaca/rss/",
-          "categories": [
-            "inland"
-          ]
-        }
-      ]
-    },
-    {
       "id": "adnkronos",
       "name": "Adnkronos",
       "country": "IT",
@@ -870,6 +854,22 @@
           "url": "https://www.adnkronos.com/rss.xml",
           "categories": [
             "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agi",
+      "name": "AGI",
+      "country": "IT",
+      "language": "it",
+      "homepage": "https://www.agi.it",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.agi.it/cronaca/rss",
+          "categories": [
+            "inland"
           ]
         }
       ]
