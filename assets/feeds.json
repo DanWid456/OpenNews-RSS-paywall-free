@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": 4,
+  "version": 5,
   "updated": "2026-11-13",
   "generic": {
     "urlContains": [
@@ -365,12 +365,6 @@
           ]
         },
         {
-          "url": "https://www.france24.com/fr/sports/rss",
-          "categories": [
-            "sport"
-          ]
-        },
-        {
           "url": "https://www.france24.com/fr/culture/rss",
           "categories": [
             "kultur"
@@ -589,33 +583,9 @@
       "paywall": {},
       "feeds": [
         {
-          "url": "https://api2.rtve.es/rss/temas_noticias.xml",
+          "url": "https://www.rtve.es/api/noticias.rss",
           "categories": [
             "top"
-          ]
-        },
-        {
-          "url": "https://api2.rtve.es/rss/temas_espana.xml",
-          "categories": [
-            "inland"
-          ]
-        },
-        {
-          "url": "https://api2.rtve.es/rss/temas_mundo.xml",
-          "categories": [
-            "ausland"
-          ]
-        },
-        {
-          "url": "https://api2.rtve.es/rss/temas_economia.xml",
-          "categories": [
-            "wirtschaft"
-          ]
-        },
-        {
-          "url": "https://api2.rtve.es/rss/temas_deportes.xml",
-          "categories": [
-            "sport"
           ]
         }
       ]
@@ -659,12 +629,6 @@
           ]
         },
         {
-          "url": "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml",
-          "categories": [
-            "technik"
-          ]
-        },
-        {
           "url": "https://www.ansa.it/sito/notizie/sport/sport_rss.xml",
           "categories": [
             "sport"
@@ -674,6 +638,38 @@
           "url": "https://www.ansa.it/sito/notizie/cultura/cultura_rss.xml",
           "categories": [
             "kultur"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20minutos",
+      "name": "20minutos",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://www.20minutos.es",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.20minutos.es/rss/",
+          "categories": [
+            "top"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "europapress",
+      "name": "Europa Press",
+      "country": "ES",
+      "language": "es",
+      "homepage": "https://www.europapress.es",
+      "paywall": {},
+      "feeds": [
+        {
+          "url": "https://www.europapress.es/rss/rss.aspx",
+          "categories": [
+            "top"
           ]
         }
       ]

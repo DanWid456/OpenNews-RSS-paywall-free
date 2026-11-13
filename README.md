@@ -79,8 +79,8 @@ anzeigen» ist angekreuzt. Vier eigene Feeds sind kostenlos
 
 ## Sprachen
 
-Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch
-(`lib/l10n.dart`). Neue Texte dort in allen vier Sprachen ergänzen.
+Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch, Englisch und
+Spanisch (`lib/l10n.dart`). Neue Texte dort in allen fünf Sprachen ergänzen.
 
 ## Homescreen-Widget
 
