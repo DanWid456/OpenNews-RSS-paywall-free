@@ -199,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text([
                     if (e.categories.isNotEmpty)
                       tr('cat_${e.categories.first}'),
-                    e.source.unfiltered ? tr('filter_off') : tr('filter_on'),
+                    e.unfiltered ? tr('filter_off') : tr('filter_on'),
                   ].join(' · ')),
                   trailing: const Icon(Icons.edit_outlined),
                   onTap: () => showDialog<void>(
@@ -228,6 +228,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: Text(tr('deep_sub')),
                 value: app.deepCheck,
                 onChanged: app.setDeepCheck,
+              ),
+              SectionHeader(tr('sec_storage')),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LabeledDropdown(
+                      label: tr('keep_days'),
+                      value: '${app.keepDays}',
+                      options: {
+                        for (final d in const [7, 14, 30, 90])
+                          '$d': tr('days', {'n': d}),
+                      },
+                      onChanged: (v) => app.setKeepDays(int.parse(v)),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(tr('keep_days_sub'),
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
               ),
               SectionHeader(tr('sec_muted')),
               Padding(

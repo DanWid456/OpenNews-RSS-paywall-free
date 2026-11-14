@@ -14,7 +14,7 @@ class SourcesScreen extends StatelessWidget {
   String _subtitle(FeedEntry e, SourceStats? s) {
     final cat =
         e.categories.isEmpty ? '' : '${tr('cat_${e.categories.first}')}\n';
-    if (e.source.unfiltered) return '$cat${tr('filter_off')}';
+    if (e.unfiltered) return '$cat${tr('filter_off')}';
     if (s == null || s.total == 0) return '$cat${tr('stats_none')}';
     return cat +
         tr('stats_line', {
@@ -66,7 +66,8 @@ class SourcesScreen extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(tr('sources_hint'), style: text.bodySmall),
+                child: Text('${tr('sources_hint')}\n\n${tr('sources_widget')}',
+                    style: text.bodySmall),
               ),
               if (all.isEmpty) ListTile(title: Text(tr('err_no_sources'))),
               if (own.isNotEmpty) SectionHeader(tr('src_own_country')),

@@ -235,8 +235,8 @@ class _AddFeedDialogState extends State<AddFeedDialog> {
   }
 }
 
-/// Name und Thema eines Feeds anpassen. Bei eigenen Feeds zusätzlich
-/// «ungefiltert» und Entfernen.
+/// Name und Thema eines Feeds anpassen, Paywall-Filter aus- oder
+/// einschalten. Eigene Feeds lassen sich hier auch entfernen.
 class EditFeedDialog extends StatefulWidget {
   final FeedEntry entry;
   const EditFeedDialog({super.key, required this.entry});
@@ -255,7 +255,7 @@ class _EditFeedDialogState extends State<EditFeedDialog> {
   late String category = widget.entry.categories.isEmpty
       ? 'top'
       : widget.entry.categories.first;
-  late bool unfiltered = custom?.unfiltered ?? false;
+  late bool unfiltered = widget.entry.unfiltered;
 
   @override
   void dispose() {
@@ -264,6 +264,7 @@ class _EditFeedDialogState extends State<EditFeedDialog> {
   }
 
   Future<void> _save() async {
+    final e = widget.entry;
     final c = custom;
     if (c != null) {
       await app.updateCustomFeed(c,
@@ -273,11 +274,13 @@ class _EditFeedDialogState extends State<EditFeedDialog> {
     } else {
       // Unveränderter Vorgabename wird nicht als eigener Name gespeichert,
       // sonst stünde z. B. «SRF – Wirtschaft» statt «SRF» in der Artikelliste.
-      final e = widget.entry;
       final typed = nameController.text.trim();
       final untouched = typed == e.listName && e.label == e.source.name;
       await app.setFeedOverride(e.url,
           name: untouched ? '' : typed, category: category);
+      if (unfiltered != e.unfiltered) {
+        await app.setSourceUnfiltered(e.source.id, unfiltered);
+      }
     }
     if (mounted) Navigator.pop(context);
   }
@@ -285,6 +288,7 @@ class _EditFeedDialogState extends State<EditFeedDialog> {
   @override
   Widget build(BuildContext context) {
     final c = custom;
+    final scheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text(tr('edit_feed')),
       content: SingleChildScrollView(
@@ -303,30 +307,36 @@ class _EditFeedDialogState extends State<EditFeedDialog> {
               value: category,
               onChanged: (v) => setState(() => category = v),
             ),
-            if (c != null) ...[
-              const SizedBox(height: 4),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text(tr('unfiltered_check')),
-                subtitle: Text(tr('unfiltered_sub')),
-                value: unfiltered,
-                onChanged: (v) => setState(() => unfiltered = v ?? false),
+            const SizedBox(height: 4),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: Text(tr('unfiltered_check')),
+              subtitle: Text(c != null
+                  ? tr('unfiltered_sub')
+                  : tr('unfiltered_source_sub',
+                      {'s': widget.entry.source.name})),
+              value: unfiltered,
+              onChanged: (v) => setState(() => unfiltered = v ?? false),
+            ),
+            if (c != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: scheme.error),
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(tr('delete_feed')),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await app.removeCustomFeed(c);
+                  },
+                ),
               ),
-            ],
           ],
         ),
       ),
       actions: [
-        if (c != null)
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await app.removeCustomFeed(c);
-            },
-            child: Text(tr('delete_feed')),
-          )
-        else
+        if (c == null)
           TextButton(
             onPressed: () async {
               Navigator.pop(context);

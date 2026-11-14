@@ -50,6 +50,10 @@ class AppState extends ChangeNotifier {
   String? selectedCategory;
   String search = '';
 
+  /// Tagesansicht: 0 = Heute (alle neuen Artikel), 1 = gestern usw.
+  int dayOffset = 0;
+  List<Article> _dayArticles = [];
+
   @override
   void notifyListeners() {
     // Jede Zustandsänderung kann Namen, Themen oder Auswahl der Feeds
@@ -73,6 +77,9 @@ class AppState extends ChangeNotifier {
 
   int get viewMode => _prefs.getInt('viewMode') ?? 1;
   bool get deepCheck => _prefs.getBool('deepCheck') ?? true;
+
+  /// So viele Tage bleiben Artikel gespeichert (Gemerkte unbegrenzt).
+  int get keepDays => _prefs.getInt('keepDays') ?? 30;
   List<String> get mutedWords => _prefs.getStringList('mutedWords') ?? const [];
   ThemeMode get themeMode =>
       ThemeMode.values[(_prefs.getInt('themeMode') ?? 0).clamp(0, 2).toInt()];
@@ -140,17 +147,7 @@ class AppState extends ChangeNotifier {
   /// dessen Aktualisierung an.
   Future<void> _updateWidget() async {
     try {
-      final keepCategory = selectedCategory;
-      final keepSearch = search;
-      selectedCategory = null;
-      search = '';
-      var items = <Article>[];
-      try {
-        items = feed.take(25).toList();
-      } finally {
-        selectedCategory = keepCategory;
-        search = keepSearch;
-      }
+      final items = _visible(_articles).take(25).toList();
       String two(int n) => n.toString().padLeft(2, '0');
       final data = [
         for (final a in items)
@@ -266,6 +263,8 @@ class AppState extends ChangeNotifier {
     }
     // Gibt es keine Quelle aus dem eigenen Land, sind alle von Haus aus an.
     final noneLocal = !sources.any((x) => x.country == country);
+    final unfilteredSources =
+        (_prefs.getStringList('unfilteredSources') ?? const <String>[]).toSet();
     final out = <FeedEntry>[];
     for (final s in [...sources, ...customFeeds.map((f) => f.toSource())]) {
       for (final f in s.feeds) {
@@ -286,6 +285,8 @@ class AppState extends ChangeNotifier {
           listName: name.isNotEmpty ? name : _defaultListName(s, cats),
           categories: cats,
           enabled: (o?['enabled'] as bool?) ?? defaultOn,
+          unfiltered:
+              s.isCustom ? s.unfiltered : unfilteredSources.contains(s.id),
         ));
       }
     }
@@ -337,30 +338,90 @@ class AppState extends ChangeNotifier {
       a.status == PaywallStatus.unclear ||
       (a.status == PaywallStatus.unchecked && !deepCheck);
 
-  List<Article> get feed {
+  static const _trackingPrefixes = ['utm_', 'srg_', 'ns_', 'at_', 'wt_', 'mc_'];
+  static const _trackingKeys = {
+    'xtor', 'ref', 'source', 'cmp', 'cmpid', 'ito', 'fbclid', 'gclid', 'rss',
+    'partner', 'ftcamp',
+  };
+  static final _leadingWww = RegExp(r'^www\.');
+
+  /// Adresse ohne Tracking-Zusätze. Damit wird derselbe Artikel erkannt,
+  /// wenn er in zwei Feeds mit leicht verschiedenen Links steht.
+  String _linkKey(String link) {
+    final uri = Uri.tryParse(link);
+    if (uri == null || uri.host.isEmpty) return link;
+    final kept = <String>[];
+    uri.queryParametersAll.forEach((k, values) {
+      final key = k.toLowerCase();
+      if (_trackingKeys.contains(key) ||
+          _trackingPrefixes.any(key.startsWith)) {
+        return;
+      }
+      for (final v in values) {
+        kept.add('$k=$v');
+      }
+    });
+    kept.sort();
+    var path = uri.path;
+    if (path.endsWith('/')) path = path.substring(0, path.length - 1);
+    final host = uri.host.toLowerCase().replaceFirst(_leadingWww, '');
+    return '$host$path${kept.isEmpty ? '' : '?${kept.join('&')}'}';
+  }
+
+  /// Filtert [source] nach Quellen, Interessen, Prüfstatus, stummen Wörtern
+  /// und entfernt Doppelte (gleicher Link oder gleicher Titel).
+  List<Article> _visible(List<Article> source,
+      {String? category, String query = ''}) {
     final wanted = interests.toSet();
     final muted = mutedWords.map((w) => w.toLowerCase()).toList();
-    final query = search.trim().toLowerCase();
     final seen = <String>{};
     final out = <Article>[];
-    for (final a in _articles) {
+    for (final a in source) {
       final active = _activeEntriesOf(a);
       if (active.isEmpty || !_statusVisible(a)) continue;
       final cats = <String>{for (final e in active) ...e.categories};
       final isCustom = active.any((e) => e.isCustom);
       if (!isCustom && !cats.any(wanted.contains)) continue;
-      if (selectedCategory != null && !cats.contains(selectedCategory)) {
-        continue;
-      }
+      if (category != null && !cats.contains(category)) continue;
       final text = '${a.title} ${a.summary}'.toLowerCase();
       if (muted.any(text.contains)) continue;
       if (query.isNotEmpty && !text.contains(query)) continue;
-      // Gleiche Meldung aus mehreren Feeds nur einmal zeigen.
-      final key = a.title.toLowerCase().replaceAll(_nonWord, '');
-      if (key.isNotEmpty && !seen.add(key)) continue;
+      final linkKey = 'l:${_linkKey(a.link)}';
+      final titleKey = 't:${a.title.toLowerCase().replaceAll(_nonWord, '')}';
+      final hasTitle = titleKey.length > 2;
+      if (seen.contains(linkKey) || (hasTitle && seen.contains(titleKey))) {
+        continue;
+      }
+      seen.add(linkKey);
+      if (hasTitle) seen.add(titleKey);
       out.add(a);
     }
     return out;
+  }
+
+  List<Article> get feed => _visible(
+        dayOffset == 0 ? _articles : _dayArticles,
+        category: selectedCategory,
+        query: search.trim().toLowerCase(),
+      );
+
+  /// Mitternacht des Tages, der [offset] Tage zurückliegt.
+  DateTime dayOf(int offset) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day - offset);
+  }
+
+  Future<List<Article>> _loadDay(int offset) =>
+      db.byDay(dayOf(offset), dayOf(offset - 1));
+
+  /// Wechselt die Tagesansicht; 0 zeigt wieder alle neuen Artikel.
+  Future<void> setDayOffset(int offset) async {
+    var o = offset;
+    if (o < 0) o = 0;
+    if (o > keepDays) o = keepDays;
+    dayOffset = o;
+    _dayArticles = o == 0 ? [] : await _loadDay(o);
+    notifyListeners();
   }
 
   Set<String> _keywords(String title) => title
@@ -397,6 +458,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> _reload({bool notify = true}) async {
     _articles = await db.recent();
+    if (dayOffset > 0) _dayArticles = await _loadDay(dayOffset);
     bookmarks = await db.bookmarks();
     hiddenCount = await db.hiddenCount();
     final s = <String, SourceStats>{};
@@ -458,7 +520,7 @@ class AppState extends ChangeNotifier {
       } else if (jobs.isNotEmpty && failures == jobs.length) {
         lastError = tr('err_offline');
       }
-      await db.prune();
+      await db.prune(days: keepDays);
       await _reload();
       if (deepCheck) await _runDeepCheck();
     } finally {
@@ -485,7 +547,7 @@ class AppState extends ChangeNotifier {
     for (final it in parsed.items.take(40)) {
       if (!it.link.startsWith('http') || it.title.isEmpty) continue;
       var status = PaywallStatus.unchecked;
-      if (e.source.unfiltered || e.source.paywallFree) {
+      if (e.unfiltered || e.source.paywallFree) {
         status = PaywallStatus.free;
       } else if (matchesRules(
           link: it.link, title: it.title, summary: it.summary, rules: rules)) {
@@ -550,20 +612,16 @@ class AppState extends ChangeNotifier {
     await _reload();
   }
 
-  Future<void> reportPaywall(Article a) async {
-    await db.reportPaywall(a.link);
+  /// Blendet einen Artikel aus der Liste aus.
+  Future<void> hideArticle(Article a) async {
+    await db.setHidden(a.link, true, a.status);
     await _reload();
   }
 
-  /// Öffnet ein vorausgefülltes GitHub-Issue zur gemeldeten Paywall.
-  Future<void> openIssueFor(Article a) async {
-    if (!kIssuesConfigured) return;
-    final uri = Uri.https('github.com', '/$kIssueRepo/issues/new', {
-      'title': 'Paywall nicht erkannt: ${a.sourceName}',
-      'body': 'Quelle: ${a.sourceName} (${a.sourceId})\nLink: ${a.link}\n'
-          'Titel: ${a.title}\n',
-    });
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  /// Macht [hideArticle] rückgängig; [a] trägt noch den früheren Status.
+  Future<void> unhideArticle(Article a) async {
+    await db.setHidden(a.link, false, a.status);
+    await _reload();
   }
 
   Future<void> openInBrowser(String link) async {
@@ -671,6 +729,32 @@ class AppState extends ChangeNotifier {
     }
     notifyListeners();
     unawaited(refresh());
+  }
+
+  /// Schaltet den Paywall-Filter für alle Feeds einer Katalogquelle aus
+  /// oder wieder ein (z. B. wenn der Nutzer dort ein Abo hat).
+  Future<void> setSourceUnfiltered(String sourceId, bool value) async {
+    final set =
+        (_prefs.getStringList('unfilteredSources') ?? const <String>[]).toSet();
+    if (value) {
+      set.add(sourceId);
+    } else {
+      set.remove(sourceId);
+    }
+    await _prefs.setStringList('unfilteredSources', set.toList());
+    // Ungefiltert: alles zeigen. Gefiltert: alles neu prüfen.
+    await db.resetStatus(
+        sourceId, value ? PaywallStatus.free : PaywallStatus.unchecked);
+    notifyListeners();
+    unawaited(refresh());
+  }
+
+  /// Legt fest, nach wie vielen Tagen Artikel gelöscht werden.
+  Future<void> setKeepDays(int days) async {
+    await _prefs.setInt('keepDays', days);
+    if (dayOffset > days) dayOffset = 0;
+    await db.prune(days: days);
+    await _reload();
   }
 
   /// Name und Thema eines Katalog-Feeds auf die Vorgabe zurücksetzen.

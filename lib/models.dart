@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 /// Prüfstatus eines Artikels. Die Reihenfolge ist Teil des DB-Formats.
-enum PaywallStatus { unchecked, free, paywall, unclear }
+enum PaywallStatus { unchecked, free, paywall, unclear, hidden }
 
 List<String> _strList(dynamic v) =>
     v is List ? v.map((e) => e.toString()).toList() : <String>[];
@@ -256,6 +256,9 @@ class FeedEntry {
   final List<String> categories;
   final bool enabled;
 
+  /// Alle Beiträge ohne Paywall-Prüfung anzeigen (z. B. bei eigenem Abo).
+  final bool unfiltered;
+
   const FeedEntry({
     required this.source,
     required this.feed,
@@ -263,6 +266,7 @@ class FeedEntry {
     required this.listName,
     required this.categories,
     required this.enabled,
+    required this.unfiltered,
   });
 
   String get url => feed.url;

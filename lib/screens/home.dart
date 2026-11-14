@@ -97,6 +97,60 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
+  Widget _chevron(IconData icon, String tooltip, VoidCallback? onPressed) {
+    return IconButton(
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      icon: Icon(icon),
+      onPressed: onPressed,
+    );
+  }
+
+  /// «HEUTE >» bzw. «HEUTE < Datum >»: Der Pfeil nach rechts geht einen Tag
+  /// in die Vergangenheit, der nach links zurück, HEUTE springt auf heute.
+  Widget _dayNav() {
+    final theme = Theme.of(context);
+    final offset = app.dayOffset;
+    final day = app.dayOf(offset);
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: offset == 0 ? null : () => app.setDayOffset(0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                tr('today').toUpperCase(),
+                style: theme.textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: offset == 0 ? null : theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          if (offset > 0) ...[
+            _chevron(Icons.chevron_left, tr('day_newer'),
+                () => app.setDayOffset(offset - 1)),
+            Text('${day.day}.${day.month}.',
+                style: theme.textTheme.titleMedium),
+          ],
+          _chevron(
+              Icons.chevron_right,
+              tr('day_older'),
+              offset >= app.keepDays
+                  ? null
+                  : () => app.setDayOffset(offset + 1)),
+        ],
+      ),
+    );
+  }
+
   Widget _tab(String? id) {
     final selected = app.selectedCategory == id;
     final scheme = Theme.of(context).colorScheme;
@@ -173,9 +227,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('today'),
-                              style: text.headlineSmall!
-                                  .copyWith(fontWeight: FontWeight.w600)),
+                          _dayNav(),
                           Text(
                             hidden == 0
                                 ? tr('only_free')
@@ -237,8 +289,10 @@ class _FeedScreenState extends State<FeedScreen> {
                                 color: theme.colorScheme.onSurfaceVariant),
                             const SizedBox(height: 16),
                             Text(
-                              app.lastError ??
-                                  (busy ? tr('loading') : tr('empty')),
+                              app.dayOffset > 0
+                                  ? tr('day_empty')
+                                  : (app.lastError ??
+                                      (busy ? tr('loading') : tr('empty'))),
                               textAlign: TextAlign.center,
                               style: text.bodyLarge,
                             ),

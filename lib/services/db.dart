@@ -128,10 +128,28 @@ class AppDb {
         where: 'link = ?', whereArgs: [link]);
   }
 
-  Future<void> reportPaywall(String link) async {
+  /// Blendet einen Artikel auf Wunsch des Nutzers aus bzw. wieder ein.
+  /// `reported` schützt ausgeblendete Artikel vor dem Zurücksetzen.
+  Future<void> setHidden(
+      String link, bool hidden, PaywallStatus restore) async {
     await _db.update(
-        'articles', {'status': PaywallStatus.paywall.index, 'reported': 1},
-        where: 'link = ?', whereArgs: [link]);
+        'articles',
+        {
+          'status': hidden ? PaywallStatus.hidden.index : restore.index,
+          'reported': hidden ? 1 : 0,
+        },
+        where: 'link = ?',
+        whereArgs: [link]);
+  }
+
+  /// Alle Artikel eines Kalendertags (für die Tagesansicht).
+  Future<List<Article>> byDay(DateTime start, DateTime end) async {
+    final rows = await _db.query('articles',
+        where: 'published >= ? AND published < ?',
+        whereArgs: [start.millisecondsSinceEpoch, end.millisecondsSinceEpoch],
+        orderBy: 'published DESC',
+        limit: 3000);
+    return rows.map(Article.fromMap).toList();
   }
 
   Future<int> hiddenCount({int hours = 24}) async {

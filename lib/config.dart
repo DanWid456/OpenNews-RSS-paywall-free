@@ -1,11 +1,9 @@
 /// Zentrale Einstellungen. Die Quellenliste wird aus dem GitHub-Repository
-/// nachgeladen; Paywall-Meldungen öffnen dort ein Issue.
+/// nachgeladen.
 const String kRemoteFeedsUrl =
     'https://raw.githubusercontent.com/DanWid456/OpenNews-RSS-paywall-free/main/assets/feeds.json';
-const String kIssueRepo = 'DanWid456/OpenNews-RSS-paywall-free';
 
 bool get kRemoteConfigured => !kRemoteFeedsUrl.contains('OWNER/REPO');
-bool get kIssuesConfigured => !kIssueRepo.contains('OWNER/REPO');
 
 /// Höchste Schema-Version der feeds.json, die diese App-Version versteht.
 const int kSupportedSchema = 1;

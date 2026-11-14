@@ -8,8 +8,7 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
 1. Den Inhalt dieses Ordners ins Repository
    `DanWid456/OpenNews-RSS-paywall-free` (Branch `main`) hochladen.
 2. Die Quellenliste wird online aus `assets/feeds.json` dieses Repositorys
-   nachgeladen; «Weitermelden» öffnet dort ein Issue. Beides steht in
-   `lib/config.dart`.
+   nachgeladen. Die Adresse steht in `lib/config.dart`.
 3. Der Workflow `.github/workflows/build.yml` baut bei jedem Push auf `main`
    eine Test-APK (Artefakt `opennews-apk`). In dieser APK ist Pro ohne Kauf
    freigeschaltet (`UNLOCK_PRO`).

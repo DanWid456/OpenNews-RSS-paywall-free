@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app_state.dart';
-import '../config.dart';
 import '../l10n.dart';
 import '../models.dart';
 import '../screens/reader.dart';
@@ -88,19 +87,15 @@ Future<void> showArticleMenu(BuildContext context, Article a) async {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.lock_outline),
+            leading: const Icon(Icons.visibility_off_outlined),
             title: Text(tr('menu_report')),
-            subtitle: Text(tr('menu_report_sub')),
             onTap: () async {
               Navigator.pop(sheet);
-              await app.reportPaywall(a);
+              await app.hideArticle(a);
               messenger.showSnackBar(SnackBar(
                 content: Text(tr('reported')),
-                action: kIssuesConfigured
-                    ? SnackBarAction(
-                        label: tr('report_forward'),
-                        onPressed: () => app.openIssueFor(a))
-                    : null,
+                action: SnackBarAction(
+                    label: tr('undo'), onPressed: () => app.unhideArticle(a)),
               ));
             },
           ),
