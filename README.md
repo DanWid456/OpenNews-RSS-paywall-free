@@ -1,4 +1,4 @@
-# OpenNews
+# OpenNews 1.0
 
 RSS-News-Reader für Android (Flutter), der Artikel hinter Bezahlschranken
 ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
@@ -42,7 +42,8 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
 
 - `version` bei jeder Änderung um 1 erhöhen – nur dann übernimmt die App die
   Datei. `schemaVersion` nur ändern, wenn sich der Aufbau ändert.
-- `country`: `CH`, `DE`, `AT`. `language`: `de`, `fr`, `it`, `en`.
+- `country`: `CH`, `DE`, `AT`, `FR`, `IT`, `ES`, `GB`, `US`, `CA`.
+  `language`: `de`, `fr`, `it`, `en`, `es`.
 - `categories`: `top`, `inland`, `ausland`, `politik`, `wirtschaft`, `technik`,
   `sport`, `kultur`, `gesundheit`, `alltag`.
 - Angezeigt werden alle Quellen in der Nachrichtensprache des Nutzers. Quellen
@@ -52,6 +53,8 @@ ausblendet. Alles läuft auf dem Gerät, es gibt keinen eigenen Server.
   sich nicht prüfen lassen (z. B. France 24).
 - `"optional": true` bei einer Quelle: Sie wird angeboten, ist aber von Haus
   aus ausgeschaltet. Für Quellen mit häufiger Bezahlschranke.
+- `generic.videoUrlContains`: zusätzliche Link-Bestandteile, an denen
+  Video-Beiträge erkannt werden (Vorgabe in `kVideoUrlPatterns`).
 - `urlContains`, `titlePrefixes`, `textContains` wirken in Stufe 1 (aus dem
   Feed), `htmlContains` in Stufe 2 (im HTML der Artikelseite).
 - Der Reiter «Quellen» in der App zeigt pro Quelle die Paywall-Quote. Quellen
@@ -76,6 +79,10 @@ jeder Änderung der `feeds.json` oder von Hand unter Actions.
 3. Das Ergebnis wird in der lokalen Datenbank gespeichert; jeder Artikel wird
    nur einmal geprüft. Pro Aktualisierung werden höchstens 60 Artikel tief
    geprüft (`kDeepCheckBatch`).
+
+**Video-Beiträge** (Schalter in den Einstellungen, standardmässig aus) werden
+am Link erkannt (`/video/`, `/vidéo/` …) und in Stufe 2 an `og:type` «video»
+oder an einem `VideoObject` mit wenig Fliesstext.
 
 Eigene Feeds werden genauso gefiltert, ausser «Alle Beiträge ungefiltert
 anzeigen» ist angekreuzt. Vier eigene Feeds sind kostenlos
@@ -103,9 +110,42 @@ Tests gedacht.
 
 ## Play Store
 
-- In der Play Console ein Einmalkauf-Produkt mit der ID `pro_upgrade` anlegen.
-- `android/`-Ordner einmal erzeugen (`flutter create --platforms=android --org ch.dawisoft --project-name opennews .`),
-  einchecken und die Signatur festlegen. Die App-ID ist `ch.dawisoft.opennews`
-  und lässt sich nach der ersten Veröffentlichung nicht mehr ändern.
-- Googles Anforderungen für News-Apps beachten (Angaben zum Herausgeber,
-  Quellenangabe pro Artikel).
+### Im Repository
+- `.github/workflows/release.yml` baut das signierte App-Bundle (`.aab`).
+  Start von Hand unter Actions → «Release bauen (Play Store)». Es bricht ab,
+  wenn das Bundle mit dem Test-Schlüssel signiert wäre.
+- `tool/setup_android.sh` setzt Ziel- und Kompilier-API auf mindestens 36.
+- App-Symbol: `android_extra/app/src/main/res/mipmap-*` (adaptiv, mit
+  einfarbiger Variante für Android 13+).
+- Store-Grafiken: `store/icon_512.png`, `store/feature_graphic_1024x500.png`.
+- Store-Texte in fünf Sprachen: `store/STORE_LISTING.md` und
+  `fastlane/metadata/android/<Sprache>/`.
+- Datenschutzerklärung: `PRIVACY.md` (Link in der App unter Einstellungen →
+  Über die App).
+
+### Upload-Schlüssel einrichten (einmalig)
+1. In Android Studio: Build → Generate Signed App Bundle or APK → Android App
+   Bundle → «Create new…». Schlüsseldatei (`upload.jks`), Passwörter und Alias
+   festlegen. **Datei und Passwörter sicher aufbewahren** – ohne sie gibt es
+   keine Updates mehr.
+2. Datei in Base64 umwandeln, unter Windows in PowerShell:
+   `[Convert]::ToBase64String([IO.File]::ReadAllBytes("upload.jks")) | Set-Clipboard`
+3. Im Repository unter Settings → Secrets and variables → Actions vier
+   Secrets anlegen: `UPLOAD_KEYSTORE_BASE64` (der kopierte Text),
+   `UPLOAD_STORE_PASSWORD`, `UPLOAD_KEY_ALIAS`, `UPLOAD_KEY_PASSWORD`.
+
+### In der Play Console
+- App anlegen, App-ID `ch.dawisoft.opennews` (nach der ersten
+  Veröffentlichung nicht mehr änderbar). Play App Signing aktiv lassen.
+- Einmalkauf `pro_upgrade` anlegen und aktivieren, Preis dort festlegen.
+- Datenschutz-URL:
+  `https://github.com/DanWid456/OpenNews-RSS-paywall-free/blob/main/PRIVACY.md`
+- Datensicherheit: Die App erhebt und teilt keine Daten.
+- Erklärung «News-App»: Herausgeber und Kontakt angeben; jede Meldung nennt
+  ihre Quelle.
+- Inhaltseinstufung (Fragebogen), Zielgruppe (nicht für Kinder), Werbung: keine.
+- Screenshots vom Handy (mind. 2, besser 4–8).
+- Neue private Entwicklerkonten: geschlossener Test mit mindestens 12
+  Testern über 14 Tage, bevor die Produktion freigegeben wird.
+- Versionsnummer: `version` in `pubspec.yaml`; die Zahl nach `+` muss bei
+  jedem Upload steigen.

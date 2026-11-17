@@ -1,6 +1,7 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
 import '../config.dart';
@@ -229,6 +230,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: app.deepCheck,
                 onChanged: app.setDeepCheck,
               ),
+              SwitchListTile(
+                title: Text(tr('hide_videos')),
+                subtitle: Text(tr('hide_videos_sub')),
+                value: app.hideVideos,
+                onChanged: app.setHideVideos,
+              ),
               SectionHeader(tr('sec_storage')),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -334,6 +341,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   'n': app.catalog.sources.length,
                 })),
                 onTap: () async => _snack(await app.syncCatalog()),
+              ),
+              SectionHeader(tr('sec_about')),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text(kAppName),
+                subtitle: Text(tr('version', {'v': kAppVersion})),
+              ),
+              ListTile(
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(tr('privacy')),
+                onTap: () => app.openInBrowser(kPrivacyUrl),
+              ),
+              ListTile(
+                leading: const Icon(Icons.mail_outline),
+                title: Text(tr('contact')),
+                subtitle: const Text(kContactEmail),
+                onTap: () async {
+                  try {
+                    await launchUrl(
+                        Uri(scheme: 'mailto', path: kContactEmail));
+                  } catch (_) {}
+                },
               ),
             ],
           ),

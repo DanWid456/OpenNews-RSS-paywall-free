@@ -32,5 +32,52 @@ for f in android/build.gradle.kts android/build.gradle; do
   fi
 done
 
+# Play-Store-Release: Signatur mit dem eigenen Upload-Schlüssel, wenn die
+# Umgebungsvariable UPLOAD_KEYSTORE gesetzt ist (Workflow «Release bauen»).
+# Ohne sie bleibt es beim Test-Schlüssel. Ausserdem mindestens API 36, wie
+# Google Play es seit August 2026 verlangt.
+python3 - <<'PY'
+import os, re, sys
+
+KTS_SIGN = """// OPENNEWS_UPLOAD_SIGNING
+            signingConfig = if (System.getenv("UPLOAD_KEYSTORE") != null) {
+                signingConfigs.create("upload") {
+                    storeFile = file(System.getenv("UPLOAD_KEYSTORE"))
+                    storePassword = System.getenv("UPLOAD_STORE_PASSWORD")
+                    keyAlias = System.getenv("UPLOAD_KEY_ALIAS")
+                    keyPassword = System.getenv("UPLOAD_KEY_PASSWORD")
+                }
+            } else {
+                signingConfigs.getByName("debug")
+            }"""
+GROOVY_SIGN = """// OPENNEWS_UPLOAD_SIGNING
+            signingConfig System.getenv("UPLOAD_KEYSTORE") ? signingConfigs.create("upload") {
+                storeFile file(System.getenv("UPLOAD_KEYSTORE"))
+                storePassword System.getenv("UPLOAD_STORE_PASSWORD")
+                keyAlias System.getenv("UPLOAD_KEY_ALIAS")
+                keyPassword System.getenv("UPLOAD_KEY_PASSWORD")
+            } : signingConfigs.debug"""
+
+for path in ("android/app/build.gradle.kts", "android/app/build.gradle"):
+    if not os.path.exists(path):
+        continue
+    src = open(path).read()
+    kts = path.endswith(".kts")
+    sign = re.compile(r'signingConfig\s*=\s*signingConfigs\.(getByName\("debug"\)|debug)')
+    if sign.search(src):
+        src = sign.sub(lambda m: KTS_SIGN if kts else GROOVY_SIGN, src, count=1)
+    else:
+        print("WARNUNG: Signatur-Stelle in %s nicht gefunden" % path, file=sys.stderr)
+    for key in ("compileSdk", "targetSdk"):
+        pat = re.compile(r'(%s\s*=?\s*)flutter\.%sVersion' % (key, key))
+        if kts:
+            src = pat.sub(lambda m: "%smaxOf(flutter.%sVersion, 36)" % (m.group(1), key), src)
+        else:
+            src = pat.sub(lambda m: "%sMath.max(flutter.%sVersion, 36)" % (m.group(1), key), src)
+    open(path, "w").write(src)
+    print("--- %s ---" % path)
+    print(src)
+PY
+
 echo "--- AndroidManifest.xml ---"
 cat "$MANIFEST"

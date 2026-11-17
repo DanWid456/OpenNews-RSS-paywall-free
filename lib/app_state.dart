@@ -77,6 +77,7 @@ class AppState extends ChangeNotifier {
 
   int get viewMode => _prefs.getInt('viewMode') ?? 1;
   bool get deepCheck => _prefs.getBool('deepCheck') ?? true;
+  bool get hideVideos => _prefs.getBool('hideVideos') ?? false;
 
   /// So viele Tage bleiben Artikel gespeichert (Gemerkte unbegrenzt).
   int get keepDays => _prefs.getInt('keepDays') ?? 30;
@@ -379,6 +380,7 @@ class AppState extends ChangeNotifier {
     for (final a in source) {
       final active = _activeEntriesOf(a);
       if (active.isEmpty || !_statusVisible(a)) continue;
+      if (hideVideos && a.isVideo) continue;
       final cats = <String>{for (final e in active) ...e.categories};
       final isCustom = active.any((e) => e.isCustom);
       if (!isCustom && !cats.any(wanted.contains)) continue;
@@ -556,6 +558,7 @@ class AppState extends ChangeNotifier {
       var published = it.published ?? now;
       if (published.isAfter(now)) published = now;
       list.add(Article(
+        isVideo: isVideoLink(it.link, catalog.videoUrlContains),
         link: it.link,
         feedUrls: [e.url],
         sourceId: e.source.id,
@@ -592,7 +595,8 @@ class AppState extends ChangeNotifier {
       if (result != null) {
         final needsImage = (a.imageUrl ?? '').isEmpty;
         await db.updateCheck(
-            a.link, result.status, needsImage ? result.image : null);
+            a.link, result.status, needsImage ? result.image : null,
+            isVideo: result.isVideo || a.isVideo);
       }
       checkDone++;
       if (checkDone % 5 == 0) await _reload();
@@ -676,6 +680,12 @@ class AppState extends ChangeNotifier {
   Future<void> setViewMode(int mode) async {
     await _prefs.setInt('viewMode', mode);
     notifyListeners();
+  }
+
+  Future<void> setHideVideos(bool value) async {
+    await _prefs.setBool('hideVideos', value);
+    notifyListeners();
+    unawaited(_updateWidget());
   }
 
   Future<void> setDeepCheck(bool value) async {

@@ -1,7 +1,7 @@
 name: opennews
 description: Smarter News-Reader, der Artikel hinter Bezahlschranken ausblendet.
 publish_to: 'none'
-version: 0.4.1+8
+version: 1.0.0+9
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

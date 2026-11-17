@@ -1,0 +1,30 @@
+OpenNews collects news from RSS feeds and shows you only articles you can read without a subscription. The app detects articles behind a paywall and hides them before you tap on them.
+
+HOW IT WORKS
+• Region and language are detected automatically on first launch – no location permission needed.
+• You choose your topics: headlines, national, world, politics, business, technology & science, sport, culture, health, and life & everyday.
+• Every article is checked in two stages: first by known signs in the feed, then by the article page itself. The result is saved, so each article is checked only once.
+• At the top of your feed you can see how many paywalled articles were hidden.
+
+FEATURES
+• Three views: compact, with thumbnail, or as large cards
+• Day view: go back day by day
+• Save, share and "More on this topic"
+• Read articles marked with a green check
+• Duplicate stories from several feeds are merged
+• Hide video posts if you like
+• Mute words, turn individual sources on or off
+• Paywall rate per source
+• Home screen widget with the latest headlines, freely resizable
+• Light and dark mode
+• Interface in German, French, Italian, English and Spanish
+• Older articles are deleted automatically, saved ones are kept
+
+YOUR OWN FEEDS
+Add up to four RSS or Atom feeds of your own for free – by address, keyword or OPML import. With Pro (one-time purchase, no subscription) there is no limit. If you subscribe to a source, you can turn the filter off for it.
+
+PRIVACY
+OpenNews needs no account and has no server of its own: everything runs on your device. The app collects no personal data and contains no ads or tracking.
+
+PLEASE NOTE
+OpenNews does not bypass paywalls. Articles open on the publisher's website. Detection is automatic and can occasionally be wrong – so you can also hide individual articles by hand.

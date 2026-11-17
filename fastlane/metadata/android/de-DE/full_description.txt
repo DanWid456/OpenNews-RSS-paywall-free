@@ -1,0 +1,30 @@
+OpenNews sammelt Nachrichten aus RSS-Feeds und zeigt dir nur Artikel, die du ohne Abo lesen kannst. Beiträge hinter einer Bezahlschranke erkennt die App und blendet sie aus, bevor du darauf tippst.
+
+SO FUNKTIONIERT ES
+• Region und Sprache werden beim ersten Start automatisch erkannt – ganz ohne Standortberechtigung.
+• Du wählst deine Themen: Schlagzeilen, Inland, Ausland, Politik, Wirtschaft, Technologie & Wissenschaft, Sport, Kultur, Gesundheit sowie Leben & Alltag.
+• Jeder Artikel wird in zwei Stufen geprüft: zuerst anhand bekannter Merkmale im Feed, dann anhand der Artikelseite selbst. Das Ergebnis wird gespeichert, jeder Artikel wird nur einmal geprüft.
+• Oben im Feed siehst du, wie viele Paywall-Artikel ausgeblendet wurden.
+
+FUNKTIONEN
+• Drei Ansichten: kompakt, mit Vorschaubild oder als grosse Karten
+• Tagesansicht: Tag für Tag zurückblättern
+• Merkliste, Teilen und «Mehr zum Thema»
+• Gelesene Artikel mit grünem Haken
+• Doppelte Meldungen aus mehreren Feeds werden zusammengefasst
+• Video-Beiträge auf Wunsch ausblenden
+• Wörter stummschalten, einzelne Quellen ein- und ausschalten
+• Paywall-Quote pro Quelle
+• Homescreen-Widget mit den neuesten Schlagzeilen, frei in der Grösse
+• Heller und dunkler Modus
+• Oberfläche auf Deutsch, Französisch, Italienisch, Englisch und Spanisch
+• Ältere Artikel werden automatisch gelöscht, Gemerkte bleiben erhalten
+
+EIGENE FEEDS
+Füge bis zu vier eigene RSS- oder Atom-Feeds kostenlos hinzu – per Adresse, Suchbegriff oder OPML-Import. Mit Pro (einmaliger Kauf, kein Abo) sind es beliebig viele. Hast du bei einer Quelle ein Abo, kannst du den Filter für sie ausschalten.
+
+DATENSCHUTZ
+OpenNews braucht kein Konto und hat keinen eigenen Server: Alles läuft auf deinem Gerät. Die App erhebt keine persönlichen Daten und enthält weder Werbung noch Tracking.
+
+HINWEIS
+OpenNews umgeht keine Bezahlschranken. Artikel öffnen sich auf der Website des jeweiligen Anbieters. Die Erkennung arbeitet automatisch und kann sich im Einzelfall irren – einzelne Artikel lassen sich deshalb auch von Hand ausblenden.

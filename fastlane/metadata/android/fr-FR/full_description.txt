@@ -1,0 +1,30 @@
+OpenNews rassemble les actualités de flux RSS et ne vous montre que les articles lisibles sans abonnement. L’application repère les articles derrière un paywall et les masque avant que vous ne les ouvriez.
+
+COMMENT ÇA MARCHE
+• La région et la langue sont détectées automatiquement au premier lancement, sans autorisation de localisation.
+• Vous choisissez vos thèmes : à la une, national, international, politique, économie, technologie et science, sport, culture, santé, vie et quotidien.
+• Chaque article est vérifié en deux étapes : d’abord d’après des indices connus dans le flux, puis d’après la page de l’article. Le résultat est enregistré, chaque article n’est vérifié qu’une fois.
+• En haut du fil, vous voyez combien d’articles payants ont été masqués.
+
+FONCTIONNALITÉS
+• Trois vues : compacte, avec vignette ou en grandes cartes
+• Vue par jour : remontez jour après jour
+• Enregistrer, partager et « Plus sur ce sujet »
+• Articles lus marqués d’une coche verte
+• Les doublons provenant de plusieurs flux sont regroupés
+• Masquer les vidéos si vous le souhaitez
+• Masquer des mots, activer ou désactiver chaque source
+• Taux de paywall par source
+• Widget d’écran d’accueil avec les derniers titres, redimensionnable
+• Mode clair et sombre
+• Interface en allemand, français, italien, anglais et espagnol
+• Les anciens articles sont supprimés automatiquement, les articles enregistrés sont conservés
+
+VOS PROPRES FLUX
+Ajoutez gratuitement jusqu’à quatre flux RSS ou Atom, par adresse, mot-clé ou import OPML. Avec Pro (achat unique, sans abonnement), leur nombre est illimité. Si vous êtes abonné à une source, vous pouvez désactiver le filtre pour celle-ci.
+
+CONFIDENTIALITÉ
+OpenNews ne nécessite aucun compte et n’a pas de serveur propre : tout se passe sur votre appareil. L’application ne collecte aucune donnée personnelle et ne contient ni publicité ni pistage.
+
+REMARQUE
+OpenNews ne contourne aucun paywall. Les articles s’ouvrent sur le site de l’éditeur. La détection est automatique et peut parfois se tromper : vous pouvez donc aussi masquer des articles manuellement.

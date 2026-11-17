@@ -37,6 +37,20 @@ const List<String> kCategoryIds = [
 const int kFreeCustomFeeds = 4;
 
 const String kAppName = 'OpenNews';
+const String kAppVersion = '1.0.0';
+const String kPrivacyUrl =
+    'https://github.com/DanWid456/OpenNews-RSS-paywall-free/blob/main/PRIVACY.md';
+const String kContactEmail = 'dawisoft.ch@gmail.com';
+
+/// Link-Bestandteile, an denen Video-Beiträge erkannt werden. Ergänzbar über
+/// `generic.videoUrlContains` in feeds.json.
+const List<String> kVideoUrlPatterns = [
+  '/video/',
+  '/videos/',
+  '/vidéo/',
+  '/vidéos/',
+  '/play/tv/',
+];
 
 const Map<String, String> kCountries = {
   'CH': 'Schweiz',

@@ -83,11 +83,15 @@ class FeedCatalog {
   final PaywallRules generic;
   final List<NewsSource> sources;
 
+  /// Zusätzliche Link-Bestandteile für Video-Beiträge.
+  final List<String> videoUrlContains;
+
   const FeedCatalog({
     required this.schemaVersion,
     required this.version,
     required this.generic,
     required this.sources,
+    this.videoUrlContains = const [],
   });
 
   factory FeedCatalog.empty() => const FeedCatalog(
@@ -136,6 +140,9 @@ class FeedCatalog {
       version: version,
       generic: PaywallRules.fromJson(j['generic']),
       sources: sources,
+      videoUrlContains: j['generic'] is Map
+          ? _strList((j['generic'] as Map)['videoUrlContains'])
+          : const [],
     );
   }
 }
@@ -182,6 +189,9 @@ class Article {
   final bool isRead;
   final bool bookmarked;
 
+  /// Der Beitrag ist hauptsächlich ein Video.
+  final bool isVideo;
+
   const Article({
     required this.link,
     required this.feedUrls,
@@ -196,6 +206,7 @@ class Article {
     this.content,
     this.isRead = false,
     this.bookmarked = false,
+    this.isVideo = false,
   });
 
   bool get hasFullText => (content ?? '').length > 1500;
@@ -214,6 +225,7 @@ class Article {
         'status': status.index,
         'isRead': isRead ? 1 : 0,
         'bookmarked': bookmarked ? 1 : 0,
+        'isVideo': isVideo ? 1 : 0,
       };
 
   factory Article.fromMap(Map<String, Object?> m) {
@@ -238,6 +250,7 @@ class Article {
           (st < 0 || st >= PaywallStatus.values.length) ? 0 : st],
       isRead: ((m['isRead'] as int?) ?? 0) == 1,
       bookmarked: ((m['bookmarked'] as int?) ?? 0) == 1,
+      isVideo: ((m['isVideo'] as int?) ?? 0) == 1,
     );
   }
 }

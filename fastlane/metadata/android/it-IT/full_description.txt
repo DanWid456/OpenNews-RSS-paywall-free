@@ -1,0 +1,30 @@
+OpenNews raccoglie le notizie dai feed RSS e ti mostra solo gli articoli che puoi leggere senza abbonamento. L’app riconosce gli articoli dietro un paywall e li nasconde prima che tu li apra.
+
+COME FUNZIONA
+• Regione e lingua vengono riconosciute automaticamente al primo avvio, senza autorizzazione alla posizione.
+• Scegli i tuoi temi: in primo piano, nazionale, estero, politica, economia, tecnologia e scienza, sport, cultura, salute, vita e quotidiano.
+• Ogni articolo viene verificato in due fasi: prima in base a indizi noti nel feed, poi in base alla pagina dell’articolo. Il risultato viene salvato e ogni articolo viene verificato una sola volta.
+• In cima al feed vedi quanti articoli a pagamento sono stati nascosti.
+
+FUNZIONI
+• Tre viste: compatta, con anteprima o a schede grandi
+• Vista per giorno: torna indietro giorno per giorno
+• Salva, condividi e «Altro su questo tema»
+• Articoli letti con spunta verde
+• Le notizie doppie provenienti da più feed vengono raggruppate
+• Nascondi i video, se lo desideri
+• Silenzia parole, attiva o disattiva le singole fonti
+• Quota di paywall per fonte
+• Widget per la schermata Home con gli ultimi titoli, ridimensionabile
+• Tema chiaro e scuro
+• Interfaccia in tedesco, francese, italiano, inglese e spagnolo
+• Gli articoli più vecchi vengono eliminati automaticamente, quelli salvati restano
+
+I TUOI FEED
+Aggiungi gratis fino a quattro feed RSS o Atom, tramite indirizzo, parola chiave o importazione OPML. Con Pro (acquisto unico, nessun abbonamento) puoi aggiungerne quanti vuoi. Se hai un abbonamento a una fonte, puoi disattivare il filtro per quella fonte.
+
+PRIVACY
+OpenNews non richiede alcun account e non ha un proprio server: tutto avviene sul tuo dispositivo. L’app non raccoglie dati personali e non contiene pubblicità né tracciamento.
+
+NOTA
+OpenNews non aggira alcun paywall. Gli articoli si aprono sul sito dell’editore. Il riconoscimento è automatico e in qualche caso può sbagliare: per questo puoi anche nascondere singoli articoli a mano.

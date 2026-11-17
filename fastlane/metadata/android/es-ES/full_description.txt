@@ -1,0 +1,30 @@
+OpenNews reúne noticias de fuentes RSS y solo te muestra los artículos que puedes leer sin suscripción. La app detecta los artículos tras un muro de pago y los oculta antes de que los abras.
+
+CÓMO FUNCIONA
+• La región y el idioma se detectan automáticamente al abrir la app por primera vez, sin permiso de ubicación.
+• Eliges tus temas: titulares, nacional, internacional, política, economía, tecnología y ciencia, deportes, cultura, salud y vida cotidiana.
+• Cada artículo se comprueba en dos pasos: primero por indicios conocidos en el feed y después por la propia página del artículo. El resultado se guarda y cada artículo se comprueba una sola vez.
+• En la parte superior ves cuántos artículos de pago se han ocultado.
+
+FUNCIONES
+• Tres vistas: compacta, con miniatura o en tarjetas grandes
+• Vista por días: retrocede día a día
+• Guardar, compartir y «Más sobre este tema»
+• Artículos leídos marcados con una marca verde
+• Las noticias repetidas de varias fuentes se agrupan
+• Oculta los vídeos si lo prefieres
+• Silencia palabras, activa o desactiva cada fuente
+• Tasa de muro de pago por fuente
+• Widget para la pantalla de inicio con los últimos titulares, de tamaño ajustable
+• Modo claro y oscuro
+• Interfaz en alemán, francés, italiano, inglés y español
+• Los artículos antiguos se eliminan automáticamente, los guardados se conservan
+
+TUS PROPIAS FUENTES
+Añade gratis hasta cuatro fuentes RSS o Atom, por dirección, palabra clave o importación OPML. Con Pro (compra única, sin suscripción) no hay límite. Si tienes una suscripción en una fuente, puedes desactivar el filtro para ella.
+
+PRIVACIDAD
+OpenNews no necesita cuenta ni tiene servidor propio: todo funciona en tu dispositivo. La app no recopila datos personales y no contiene publicidad ni seguimiento.
+
+AVISO
+OpenNews no evita ningún muro de pago. Los artículos se abren en la web del editor. La detección es automática y a veces puede equivocarse, por eso también puedes ocultar artículos a mano.

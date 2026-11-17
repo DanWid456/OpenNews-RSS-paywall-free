@@ -30,8 +30,25 @@ bool matchesRules({
 class DeepCheckResult {
   final PaywallStatus status;
   final String? image;
-  const DeepCheckResult(this.status, this.image);
+  final bool isVideo;
+  const DeepCheckResult(this.status, this.image, {this.isVideo = false});
 }
+
+/// Video-Beitrag anhand des Links (z. B. `/video/`), auch bei
+/// prozentkodierten Zeichen wie `/vid%C3%A9o/`.
+bool isVideoLink(String link, List<String> extra) {
+  var l = link.toLowerCase();
+  try {
+    l = Uri.decodeFull(l);
+  } catch (_) {}
+  for (final p in [...kVideoUrlPatterns, ...extra]) {
+    if (p.isNotEmpty && l.contains(p.toLowerCase())) return true;
+  }
+  return false;
+}
+
+final _videoObjectRe =
+    RegExp(r'"@type"\s*:\s*"VideoObject"', caseSensitive: false);
 
 final _accessRe = RegExp(
     r'"isaccessibleforfree"\s*:\s*"?(false|true)',
@@ -82,17 +99,27 @@ Map<String, Object?> analyzeHtml(Map<String, Object?> input) {
   final image =
       doc.querySelector('meta[property="og:image"]')?.attributes['content'];
 
+  // Wie viel lesbarer Fliesstext steht auf der Seite?
+  var paragraphs = doc.querySelectorAll('article p');
+  if (paragraphs.isEmpty) paragraphs = doc.querySelectorAll('p');
+  var length = 0;
+  for (final p in paragraphs) {
+    length += p.text.trim().length;
+    if (length >= minText) break;
+  }
+
+  // Video-Beitrag: als Video ausgewiesen, oder ein Video mit kaum Text.
+  final ogType = (doc
+              .querySelector('meta[property="og:type"]')
+              ?.attributes['content'] ??
+          '')
+      .toLowerCase();
+  final isVideo = ogType.startsWith('video') ||
+      (_videoObjectRe.hasMatch(body) && length < minText);
+
   if (verdictFree == null && !unclear) {
-    // Kein eindeutiges Signal: Ist überhaupt lesbarer Fliesstext da?
-    // Zu wenig Text heisst Zustimmungsseite, Zählschranke oder Inhalte,
-    // die erst per JavaScript nachgeladen werden.
-    var paragraphs = doc.querySelectorAll('article p');
-    if (paragraphs.isEmpty) paragraphs = doc.querySelectorAll('p');
-    var length = 0;
-    for (final p in paragraphs) {
-      length += p.text.trim().length;
-      if (length >= minText) break;
-    }
+    // Kein eindeutiges Signal: Zu wenig Text heisst Zustimmungsseite,
+    // Zählschranke oder Inhalte, die erst per JavaScript nachgeladen werden.
     if (length >= minText) {
       verdictFree = true;
     } else {
@@ -108,7 +135,7 @@ Map<String, Object?> analyzeHtml(Map<String, Object?> input) {
   } else {
     status = PaywallStatus.unclear;
   }
-  return {'status': status.index, 'image': image};
+  return {'status': status.index, 'image': image, 'video': isVideo};
 }
 
 /// Stufe 2: lädt die Artikelseite und sucht nach Paywall-Signalen.
@@ -133,5 +160,6 @@ Future<DeepCheckResult?> checkArticle(
   return DeepCheckResult(
     PaywallStatus.values[out['status'] as int],
     (image != null && image.startsWith('http')) ? image : null,
+    isVideo: out['video'] == true,
   );
 }

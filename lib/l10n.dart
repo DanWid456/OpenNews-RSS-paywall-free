@@ -186,6 +186,12 @@ const Map<String, String> _de = {
   'day_newer': 'Einen Tag vor',
   'day_empty': 'Keine Artikel an diesem Tag.',
   'sources_widget': 'Teste gerne auch unser Widget.',
+  'hide_videos': 'Video-Beiträge ausblenden',
+  'hide_videos_sub': 'Blendet Beiträge aus, die hauptsächlich aus einem Video bestehen.',
+  'sec_about': 'Über die App',
+  'version': 'Version {v}',
+  'privacy': 'Datenschutzerklärung',
+  'contact': 'Kontakt',
 };
 
 const Map<String, String> _fr = {
@@ -350,6 +356,12 @@ const Map<String, String> _fr = {
   'day_newer': 'Jour suivant',
   'day_empty': 'Aucun article ce jour-là.',
   'sources_widget': 'Essayez aussi notre widget.',
+  'hide_videos': 'Masquer les vidéos',
+  'hide_videos_sub': 'Masque les articles qui sont surtout une vidéo.',
+  'sec_about': 'À propos',
+  'version': 'Version {v}',
+  'privacy': 'Politique de confidentialité',
+  'contact': 'Contact',
 };
 
 const Map<String, String> _it = {
@@ -510,6 +522,12 @@ const Map<String, String> _it = {
   'day_newer': 'Giorno successivo',
   'day_empty': 'Nessun articolo in questo giorno.',
   'sources_widget': 'Prova anche il nostro widget.',
+  'hide_videos': 'Nascondi i video',
+  'hide_videos_sub': 'Nasconde gli articoli composti soprattutto da un video.',
+  'sec_about': 'Informazioni',
+  'version': 'Versione {v}',
+  'privacy': 'Informativa sulla privacy',
+  'contact': 'Contatto',
 };
 
 const Map<String, String> _en = {
@@ -667,6 +685,12 @@ const Map<String, String> _en = {
   'day_newer': 'Next day',
   'day_empty': 'No articles on this day.',
   'sources_widget': 'Feel free to try our widget too.',
+  'hide_videos': 'Hide video posts',
+  'hide_videos_sub': 'Hides posts that are mainly a video.',
+  'sec_about': 'About',
+  'version': 'Version {v}',
+  'privacy': 'Privacy policy',
+  'contact': 'Contact',
 };
 
 const Map<String, String> _es = {
@@ -815,4 +839,10 @@ const Map<String, String> _es = {
   'day_newer': 'Día siguiente',
   'day_empty': 'No hay artículos este día.',
   'sources_widget': 'Prueba también nuestro widget.',
+  'hide_videos': 'Ocultar vídeos',
+  'hide_videos_sub': 'Oculta las publicaciones que son principalmente un vídeo.',
+  'sec_about': 'Acerca de',
+  'version': 'Versión {v}',
+  'privacy': 'Política de privacidad',
+  'contact': 'Contacto',
 };

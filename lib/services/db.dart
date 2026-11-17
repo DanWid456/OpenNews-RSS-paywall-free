@@ -10,7 +10,7 @@ class AppDb {
     final dir = await getDatabasesPath();
     _db = await openDatabase(
       p.join(dir, 'news_reader.db'),
-      version: 2,
+      version: 3,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           // Version 2 merkt sich, aus welchen Feeds ein Artikel stammt. Der
@@ -18,12 +18,17 @@ class AppDb {
           await db.execute('ALTER TABLE articles ADD COLUMN feedUrl TEXT');
           await db.delete('articles', where: 'bookmarked = 0');
         }
+        if (oldVersion < 3) {
+          await db.execute(
+              'ALTER TABLE articles ADD COLUMN isVideo INTEGER DEFAULT 0');
+        }
       },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE articles(
             link TEXT PRIMARY KEY,
             feedUrl TEXT,
+            isVideo INTEGER DEFAULT 0,
             sourceId TEXT,
             sourceName TEXT,
             title TEXT,
@@ -111,9 +116,12 @@ class AppDb {
     return rows.map(Article.fromMap).toList();
   }
 
-  Future<void> updateCheck(
-      String link, PaywallStatus status, String? image) async {
-    final values = <String, Object?>{'status': status.index};
+  Future<void> updateCheck(String link, PaywallStatus status, String? image,
+      {bool isVideo = false}) async {
+    final values = <String, Object?>{
+      'status': status.index,
+      'isVideo': isVideo ? 1 : 0,
+    };
     if (image != null) values['imageUrl'] = image;
     await _db.update('articles', values, where: 'link = ?', whereArgs: [link]);
   }
